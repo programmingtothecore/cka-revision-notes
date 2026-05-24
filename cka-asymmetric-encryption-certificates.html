@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CKA Revision — Asymmetric Encryption, Signatures &amp; Certificates</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface-2: #1c2128;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text-dim: #8b949e;
+    --accent: #58a6ff;
+    --accent-warm: #f0883e;
+    --green: #3fb950;
+    --red: #f85149;
+    --yellow: #e3b341;
+    --purple: #bc8cff;
+    --code-bg: #010409;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    line-height: 1.7;
+    padding: 2rem 1.5rem 5rem;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(circle at 15% 10%, rgba(88, 166, 255, 0.08), transparent 40%),
+      radial-gradient(circle at 85% 80%, rgba(240, 136, 62, 0.06), transparent 40%);
+  }
+
+  .container { max-width: 940px; margin: 0 auto; }
+
+  .back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--text-dim);
+    text-decoration: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    margin-bottom: 1.5rem;
+    transition: color 0.15s;
+  }
+  .back:hover { color: var(--accent); }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1.5rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 0.75rem;
+  }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 800;
+    font-size: clamp(1.8rem, 4vw, 2.7rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+  h1 .accent { color: var(--accent-warm); font-style: italic; }
+
+  .subtitle {
+    color: var(--text-dim);
+    margin-top: 0.75rem;
+    font-size: 1.05rem;
+    max-width: 820px;
+  }
+
+  h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.6rem;
+    font-weight: 600;
+    margin-top: 3rem;
+    margin-bottom: 1rem;
+    letter-spacing: -0.01em;
+  }
+  h2::before {
+    content: "§ ";
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9em;
+  }
+
+  h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-top: 1.75rem;
+    margin-bottom: 0.6rem;
+    color: var(--text);
+  }
+
+  p { margin-bottom: 1rem; }
+  ul, ol { margin: 0.5rem 0 1.25rem 1.4rem; }
+  li { margin-bottom: 0.4rem; }
+
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--code-bg);
+    color: var(--accent-warm);
+    padding: 0.15em 0.4em;
+    border-radius: 4px;
+    font-size: 0.88em;
+    border: 1px solid var(--border);
+  }
+
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    overflow-x: visible;
+    white-space: pre-wrap;
+    margin: 1rem 0 1.5rem;
+  }
+  pre code {
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--text);
+    font-size: 0.85rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+  }
+
+  .key-fact {
+    background: linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent-warm);
+    padding: 1.1rem 1.5rem;
+    border-radius: 6px;
+    margin: 1.5rem 0;
+  }
+  .key-fact strong {
+    color: var(--accent-warm);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1rem;
+    margin: 1rem 0 1.5rem;
+  }
+
+  .mini-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--card-color, var(--accent));
+    border-radius: 8px;
+    padding: 1rem 1.15rem;
+  }
+  .mini-card h3 {
+    margin-top: 0;
+    color: var(--card-color, var(--accent));
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.86rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .scenario {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem 1.5rem;
+    margin: 1.25rem 0;
+    border-left: 4px solid var(--scenario-color, var(--accent));
+  }
+  .scenario .label {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--scenario-color, var(--accent));
+    background: rgba(88, 166, 255, 0.08);
+    padding: 0.2rem 0.55rem;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+  }
+  .scenario.good { --scenario-color: var(--green); }
+  .scenario.warn { --scenario-color: var(--yellow); }
+  .scenario.bad  { --scenario-color: var(--red); }
+  .scenario.info { --scenario-color: var(--accent); }
+  .scenario.story { --scenario-color: var(--purple); }
+
+  .dialogue {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--purple);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin: 1rem 0 1.5rem;
+  }
+  .dialogue p {
+    margin-bottom: 0.65rem;
+  }
+  .speaker {
+    color: var(--accent-warm);
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+  }
+  .action {
+    color: var(--text-dim);
+    font-style: italic;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0 1.5rem;
+    background: var(--surface);
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    font-size: 0.92rem;
+  }
+  th, td {
+    text-align: left;
+    padding: 0.7rem 0.9rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  th {
+    background: var(--surface-2);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-dim);
+  }
+  tr:last-child td { border-bottom: none; }
+
+  .flow {
+    counter-reset: step;
+    display: grid;
+    gap: 0.75rem;
+    margin: 1rem 0 1.5rem;
+  }
+  .step {
+    counter-increment: step;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.9rem 1rem 0.9rem 3.25rem;
+    position: relative;
+  }
+  .step::before {
+    content: counter(step);
+    position: absolute;
+    left: 0.95rem;
+    top: 0.9rem;
+    width: 1.65rem;
+    height: 1.65rem;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+  }
+
+  .mantra {
+    text-align: center;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 1.25rem;
+    margin: 2.5rem 0 1rem;
+    padding: 1.5rem;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    color: var(--text-dim);
+  }
+  .mantra strong {
+    display: block;
+    color: var(--accent-warm);
+    font-style: normal;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 0.5rem;
+  }
+
+  footer {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    font-family: 'JetBrains Mono', monospace;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back" href="index.html">← back to hub</a>
+
+  <header>
+    <div class="eyebrow">CKA · Security Foundations</div>
+    <h1>Asymmetric Encryption, Signatures &amp; Certificates — <span class="accent">Plain English</span></h1>
+    <p class="subtitle">A visual, no-hand-waving map of public/private keys, signatures, hashes, certificates, trust stores, CA chains, mTLS, and what this still does not solve.</p>
+  </header>
+
+  <div class="key-fact">
+    <strong>One sentence definition</strong>
+    <p style="margin: 0.6rem 0 0; color: var(--text);">
+      Asymmetric crypto solves secure communication between strangers by separating public tools from private secrets, then using signatures and certificates to prove identity and integrity.
+    </p>
+  </div>
+
+  <h2>The Starting Problem</h2>
+  <p>Symmetric encryption uses one key to both encrypt and decrypt. That is fine if you and I already share that key. But if we have never met, how do I send you the key in the first place? Email it? Anyone watching the wire grabs it. This is the <b>key distribution problem</b>.</p>
+
+  <div class="grid">
+    <div class="mini-card" style="--card-color: var(--yellow);">
+      <h3>Symmetric Problem</h3>
+      <p>Fast encryption, but both sides need the same secret key first.</p>
+    </div>
+    <div class="mini-card" style="--card-color: var(--green);">
+      <h3>Asymmetric Trick</h3>
+      <p>Public key is shareable. Private key never leaves your machine.</p>
+    </div>
+    <div class="mini-card" style="--card-color: var(--accent);">
+      <h3>Padlock Model</h3>
+      <p>Anyone can lock a box with your public padlock. Only your private key opens it.</p>
+    </div>
+  </div>
+
+  <h2>Public Key / Private Key</h2>
+  <p>Asymmetric encryption uses two mathematically linked keys. The <b>public key</b> can be shouted from the rooftops. The <b>private key</b> is guarded and never leaves your machine. Anything encrypted with the public key can only be decrypted with the matching private key. Even the public key itself cannot reverse what it just did.</p>
+
+  <p>The math rests on one-way problems. RSA uses the fact that multiplying two huge prime numbers is easy, but factoring the result back into those primes is infeasible. Elliptic curve crypto uses point multiplication on a curve. You do not need the math for the mental model; you need the idea of <b>easy one way, infeasible backward</b>.</p>
+
+  <h2>The Four Operations</h2>
+  <p>This is where many people get surprised. A private key does two jobs, not one. A public key also does two jobs.</p>
+
+  <table>
+    <tr><th>Operation</th><th>Key Used</th><th>Purpose</th></tr>
+    <tr><td>Encrypt to B</td><td>B's public key</td><td>Only B can read it.</td></tr>
+    <tr><td>Decrypt for B</td><td>B's private key</td><td>B opens what was encrypted to B.</td></tr>
+    <tr><td>Sign as A</td><td>A's private key</td><td>A proves this message came from A.</td></tr>
+    <tr><td>Verify A</td><td>A's public key</td><td>Anyone checks A's signature.</td></tr>
+  </table>
+
+  <h2>Encryption Alone Is Not Enough</h2>
+  <div class="dialogue">
+    <p><span class="speaker">A:</span> Yo I wanna send you a message but they're spying on us.</p>
+    <p><span class="speaker">B:</span> Send it using my public key. I am the only one who can decrypt it.</p>
+    <p><span class="action">A encrypts message with B's public key and sends it.</span></p>
+    <p><span class="speaker">B:</span> I decrypt with my private key and read it.</p>
+  </div>
+
+  <p>Clean, but incomplete. What if a hacker also encrypts garbage with B's public key and sends it? B can read it, but B cannot tell whether A sent it. Encryption gives <b>confidentiality</b>, not <b>authenticity</b>.</p>
+
+  <h2>Signatures Fix Authenticity</h2>
+  <p>A signature is not a key. It is a number derived from two inputs: the <b>hash of the message</b> and the sender's <b>private key</b>. First, run the message through a hash function like SHA-256. That produces a fixed-size fingerprint. Change one bit of the message and the hash changes wildly. Then sign that hash with the private key.</p>
+
+  <div class="flow">
+    <div class="step"><b>Hash the message.</b> Message becomes a fixed-size fingerprint.</div>
+    <div class="step"><b>Sign the hash.</b> Private key creates a signature bound to that hash.</div>
+    <div class="step"><b>Send message + signature.</b> You send the stamp impression, not the stamp.</div>
+    <div class="step"><b>Receiver verifies.</b> Public key checks whether the signature matches the message.</div>
+  </div>
+
+  <h2>Verification, No Magic</h2>
+  <p>This is the part explanations often gloss over. Verification is an explicit comparison.</p>
+
+  <table>
+    <tr><th>Step</th><th>Receiver Does</th><th>Result</th></tr>
+    <tr><td>1</td><td>Hash the received message.</td><td>Hash X</td></tr>
+    <tr><td>2</td><td>Use sender's public key to recover/check the hash from the signature.</td><td>Hash Y</td></tr>
+    <tr><td>3</td><td>Compare X and Y.</td><td>Equal = authentic and untampered. Not equal = reject.</td></tr>
+  </table>
+
+  <div class="scenario info">
+    <span class="label">important</span>
+    <p>The public key stores nothing. It has no memory and no database of old messages. It simply enables a math check that runs fresh every time.</p>
+  </div>
+
+  <h2>Full Message Flow</h2>
+  <div class="dialogue">
+    <p><span class="speaker">A:</span> Yo I wanna send you a message but they're spying.</p>
+    <p><span class="speaker">B:</span> You got my public key right? I've had it published forever.</p>
+    <p><span class="speaker">A:</span> Yep. Here's mine too.</p>
+    <p><span class="action">A writes message, hashes it, signs the hash with A's private key, bundles message + signature, encrypts the bundle with B's public key, and sends it.</span></p>
+    <p><span class="speaker">B:</span> I got five bundles. Four fake, one real. I decrypt each with my private key, hash the plaintext, verify signature with A's public key, and compare hashes.</p>
+    <p><span class="speaker">B:</span> Fake bundles fail. Real bundle matches. Got your message, signature checked out clean.</p>
+  </div>
+
+  <h2>What This Achieves</h2>
+  <div class="grid">
+    <div class="mini-card" style="--card-color: var(--green);">
+      <h3>Confidentiality</h3>
+      <p>Encryption means only B's private key can read the bundle.</p>
+    </div>
+    <div class="mini-card" style="--card-color: var(--accent);">
+      <h3>Authenticity</h3>
+      <p>Signature means B can tell the real sender from attacker noise.</p>
+    </div>
+    <div class="mini-card" style="--card-color: var(--purple);">
+      <h3>Integrity</h3>
+      <p>Hash comparison means tampering breaks verification.</p>
+    </div>
+  </div>
+
+  <h2>If a Signature Is Stolen</h2>
+  <p>A stolen signature is not like a stolen private key. It is bound to one specific message. You cannot graft it onto another message because the hash will not match. You cannot derive the private key from it. You cannot forge new signatures from it.</p>
+
+  <table>
+    <tr><th>Stolen Thing</th><th>Attacker Can Do</th><th>Severity</th></tr>
+    <tr><td>One signature</td><td>Maybe replay that exact signed message.</td><td>Limited</td></tr>
+    <tr><td>Many signatures</td><td>Still cannot derive the private key if crypto is implemented correctly.</td><td>Usually limited</td></tr>
+    <tr><td>Private key</td><td>Sign anything forever until revoked/rotated.</td><td>Game over</td></tr>
+  </table>
+
+  <p>The replay risk is real: an attacker may re-send your authentic signed message later. Real protocols include a <b>nonce</b>, <b>timestamp</b>, or <b>sequence number</b> inside the signed message so duplicates and stale messages can be rejected.</p>
+
+  <h2>The Giant Remaining Hole</h2>
+  <p>How does A know B's public key is actually B's? If they have never talked before, an attacker in the middle can swap in their own public key. A encrypts to the attacker, attacker decrypts, reads, re-encrypts to B, and forwards. The crypto math is flawless, but it protects the wrong key. This is the <b>man-in-the-middle</b> problem.</p>
+
+  <h2>Certificates Solve Identity Binding</h2>
+  <p>A certificate is a signed document that says: "I, a Certificate Authority, vouch that this public key belongs to this identity."</p>
+
+<pre><code>Subject: bank.com
+Subject's Public Key: the actual public key
+Issuer: DigiCert
+Valid From: 2026-01-01
+Valid Until: 2027-01-01
+Signature: signed by DigiCert's private key</code></pre>
+
+  <p>The signature on the cert is created like any other signature. The CA hashes the cert contents and signs the hash with the CA's private key. Same signing mechanism, but now applied to identity documents.</p>
+
+  <h2>Trust Store Logic</h2>
+  <p>How do you know the CA's public key is real? Your OS/browser ships with trusted CA public keys pre-installed in a <b>trust store</b>. Windows has one, macOS has one, Linux distros have one, browsers have one. When you installed your OS, you implicitly trusted those CAs.</p>
+
+  <div class="flow">
+    <div class="step">A receives B's certificate.</div>
+    <div class="step">A checks the issuer: DigiCert.</div>
+    <div class="step">A finds DigiCert's public key in the OS/browser trust store.</div>
+    <div class="step">A verifies the cert signature with DigiCert's public key.</div>
+    <div class="step">A checks validity dates and subject/SAN matches the domain.</div>
+    <div class="step">Only now does A trust the public key inside B's certificate.</div>
+  </div>
+
+  <h2>Certificate Dialogue</h2>
+  <div class="dialogue">
+    <p><span class="speaker">A:</span> I want to talk to B, but I have never talked to him. No idea what his real public key is.</p>
+    <p><span class="speaker">B:</span> Here is my certificate. It has my public key inside, plus a signature from DigiCert.</p>
+    <p><span class="speaker">A:</span> First, do I trust DigiCert? Checking trust store... yes.</p>
+    <p><span class="speaker">A:</span> Now I hash the cert contents myself, recover/check the hash from the signature using DigiCert's public key, and compare.</p>
+    <p><span class="speaker">A:</span> Hashes match. Cert is in date. Subject says bank.com. Now I trust B's public key.</p>
+  </div>
+
+  <div class="scenario warn">
+    <span class="label">precise meaning</span>
+    <p>The cert signature proves exactly one thing: whoever holds the private key matching DigiCert's public key signed this exact cert content. Trust comes from a separate judgment: DigiCert is in the trust store.</p>
+  </div>
+
+  <h2>Certificate Chains</h2>
+  <p>Real deployments usually use chains. Root CAs keep their private keys offline in vaults. They sign intermediate CAs. Intermediates sign leaf certificates for websites. Browser walks the chain: leaf → intermediate → root in trust store. Any broken link rejects the connection.</p>
+
+  <table>
+    <tr><th>Layer</th><th>Role</th><th>Why</th></tr>
+    <tr><td>Root CA</td><td>Trust anchor in OS/browser store.</td><td>Kept offline because compromise is catastrophic.</td></tr>
+    <tr><td>Intermediate CA</td><td>Signs day-to-day certificates.</td><td>Can be revoked/replaced if compromised.</td></tr>
+    <tr><td>Leaf cert</td><td>Certificate for bank.com / service endpoint.</td><td>Contains the actual server public key.</td></tr>
+  </table>
+
+  <h2>Other Certificate Fields</h2>
+  <ul>
+    <li><b>Subject Alternative Names:</b> domains the cert covers, like <code>bank.com</code>, <code>www.bank.com</code>, <code>api.bank.com</code>.</li>
+    <li><b>Key Usage:</b> what the cert is allowed to do, such as server auth, client auth, code signing.</li>
+    <li><b>Revocation:</b> CRL and OCSP let clients check whether a cert was revoked before expiry.</li>
+    <li><b>Short-lived certs:</b> Let's Encrypt's 90-day certs reduce damage if revocation fails.</li>
+  </ul>
+
+  <h2>Self-Signed Certs</h2>
+  <p>A self-signed cert is a valid X.509 cert where you sign your own cert with your own private key. No public browser trusts it by default because it does not chain to a trusted root. It is common for internal services, dev environments, corporate proxies, and private PKI where you control the trust store.</p>
+
+  <h2>Fake CA Question</h2>
+  <p>Can you create a CA called "DigiCerts" and sign certificates? Technically yes. The certificates can be cryptographically valid. But browsers reject them because your fake CA public key is not in their trust stores. Trust stores match public keys, not names.</p>
+
+  <p>Getting into real trust stores requires audits, HSM-backed key storage, documented key ceremonies, published policies, and ongoing public scrutiny. CAs that misbehave can be distrusted, as happened with DigiNotar, Symantec, and TrustCor. Certificate Transparency adds another layer by logging public CA-issued certs in public append-only logs.</p>
+
+  <h2>mTLS Full Flow</h2>
+  <p>In normal HTTPS, usually only the server has a certificate. In <b>mTLS</b>, both sides have certificates, common in service-to-service auth in Kubernetes, service meshes, and enterprise B2B systems.</p>
+
+  <div class="flow">
+    <div class="step">B sends certificate. A verifies it against A's trust store and extracts B's public key.</div>
+    <div class="step">A sends certificate. B verifies it against B's trust store and extracts A's public key.</div>
+    <div class="step">A writes message, hashes it, signs with A's private key.</div>
+    <div class="step">A bundles message + signature + nonce + timestamp.</div>
+    <div class="step">A encrypts the bundle to B.</div>
+    <div class="step">B decrypts, verifies A's signature, checks nonce/timestamp, and accepts only the valid message.</div>
+  </div>
+
+  <h2>Still Not Enough</h2>
+  <p>This foundation explains the primitives, but real TLS does more.</p>
+
+  <table>
+    <tr><th>Remaining Problem</th><th>Real-World Fix</th></tr>
+    <tr><td>Asymmetric crypto is slow.</td><td>Use it to bootstrap a fast symmetric key, then use AES/ChaCha20.</td></tr>
+    <tr><td>No forward secrecy if long-term private key leaks.</td><td>Use ephemeral Diffie-Hellman, as in TLS 1.3.</td></tr>
+    <tr><td>Replay attacks.</td><td>Use nonces, timestamps, and sequence numbers.</td></tr>
+    <tr><td>Endpoint compromise.</td><td>Use key vaults, HSMs, least privilege, endpoint hardening.</td></tr>
+    <tr><td>Future quantum attacks.</td><td>Migrate toward post-quantum cryptography.</td></tr>
+  </table>
+
+  <h2>Imperative Quick Commands for CKA Exam</h2>
+  <p>This topic is more conceptual than kubectl-heavy, but these commands help when dealing with Kubernetes TLS material and cert debugging.</p>
+
+<pre><code># Inspect a certificate
+openssl x509 -in tls.crt -text -noout
+
+# Show issuer, subject, and dates
+openssl x509 -in tls.crt -noout -issuer -subject -dates
+
+# Check Kubernetes cert expiry on kubeadm clusters
+kubeadm certs check-expiration
+
+# Inspect a TLS secret
+kubectl get secret my-tls -o yaml
+
+# Decode cert from a TLS secret
+kubectl get secret my-tls \
+  -o jsonpath='{.data.tls\.crt}' | base64 -d | openssl x509 -text -noout</code></pre>
+
+  <h2>Quick-Recall Drill</h2>
+  <table>
+    <tr><th>Question</th><th>Answer</th></tr>
+    <tr><td>Public key encrypts for whom?</td><td>The private-key holder.</td></tr>
+    <tr><td>Private key signs what?</td><td>The hash of a message.</td></tr>
+    <tr><td>Public key verifies what?</td><td>A signature made by the matching private key.</td></tr>
+    <tr><td>Certificate binds what?</td><td>Identity to public key.</td></tr>
+    <tr><td>Where does trust start?</td><td>OS/browser trust store root CAs.</td></tr>
+    <tr><td>What does mTLS add?</td><td>Client certificate verification too.</td></tr>
+  </table>
+
+  <div class="mantra">
+    <strong>The Mantra</strong>
+    "Encryption hides. Signatures prove. Certificates bind keys to names. Trust stores decide who gets believed."
+  </div>
+
+  <footer>cka_notes / security / asymmetric_encryption_certificates.html</footer>
+
+</div>
+</body>
+</html>

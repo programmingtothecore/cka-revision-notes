@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CKA Revision — How to Guess the apiVersion</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface-2: #1c2128;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text-dim: #8b949e;
+    --accent: #58a6ff;
+    --accent-warm: #f0883e;
+    --green: #3fb950;
+    --red: #f85149;
+    --yellow: #e3b341;
+    --purple: #bc8cff;
+    --code-bg: #010409;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    line-height: 1.7;
+    padding: 2rem 1.5rem 5rem;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(circle at 15% 10%, rgba(88, 166, 255, 0.08), transparent 40%),
+      radial-gradient(circle at 85% 80%, rgba(240, 136, 62, 0.06), transparent 40%);
+  }
+
+  .container { max-width: 860px; margin: 0 auto; }
+
+  .back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--text-dim);
+    text-decoration: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    margin-bottom: 1.5rem;
+    transition: color 0.15s;
+  }
+  .back:hover { color: var(--accent); }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1.5rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 0.75rem;
+  }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 800;
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+  h1 .accent { color: var(--accent-warm); font-style: italic; }
+
+  .subtitle {
+    color: var(--text-dim);
+    margin-top: 0.75rem;
+    font-size: 1.05rem;
+  }
+
+  h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.6rem;
+    font-weight: 600;
+    margin-top: 3rem;
+    margin-bottom: 1rem;
+    letter-spacing: -0.01em;
+  }
+  h2::before {
+    content: "§ ";
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9em;
+  }
+
+  h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-top: 1.75rem;
+    margin-bottom: 0.6rem;
+    color: var(--text);
+  }
+
+  p { margin-bottom: 1rem; }
+  ul, ol { margin: 0.5rem 0 1.25rem 1.4rem; }
+  li { margin-bottom: 0.4rem; }
+
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--code-bg);
+    color: var(--accent-warm);
+    padding: 0.15em 0.4em;
+    border-radius: 4px;
+    font-size: 0.88em;
+    border: 1px solid var(--border);
+  }
+
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    overflow-x: auto;
+    margin: 1rem 0 1.5rem;
+  }
+  pre code {
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--text);
+    font-size: 0.85rem;
+    line-height: 1.6;
+  }
+
+  .key-fact {
+    background: linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent-warm);
+    padding: 1.1rem 1.5rem;
+    border-radius: 6px;
+    margin: 1.5rem 0;
+  }
+  .key-fact strong {
+    color: var(--accent-warm);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .scenario {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem 1.5rem;
+    margin: 1.25rem 0;
+    border-left: 4px solid var(--scenario-color, var(--accent));
+  }
+  .scenario .label {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--scenario-color, var(--accent));
+    background: rgba(88, 166, 255, 0.08);
+    padding: 0.2rem 0.55rem;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+  }
+  .scenario h3 { margin-top: 0; }
+  .scenario.good { --scenario-color: var(--green); }
+  .scenario.warn { --scenario-color: var(--yellow); }
+  .scenario.info { --scenario-color: var(--accent); }
+  .scenario.story { --scenario-color: var(--purple); }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0 1.5rem;
+    background: var(--surface);
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    font-size: 0.92rem;
+  }
+  th, td {
+    text-align: left;
+    padding: 0.7rem 0.9rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  th {
+    background: var(--surface-2);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-dim);
+  }
+  tr:last-child td { border-bottom: none; }
+  td.api {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent-warm);
+    white-space: nowrap;
+  }
+
+  .pill {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+  }
+  .pill.green  { background: rgba(63, 185, 80, 0.15);  color: var(--green); }
+  .pill.yellow { background: rgba(227, 179, 65, 0.15); color: var(--yellow); }
+  .pill.blue   { background: rgba(88, 166, 255, 0.15); color: var(--accent); }
+  .pill.purple { background: rgba(188, 140, 255, 0.15); color: var(--purple); }
+
+  .tip {
+    background: rgba(63, 185, 80, 0.06);
+    border: 1px solid rgba(63, 185, 80, 0.25);
+    border-left: 4px solid var(--green);
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    margin: 1rem 0;
+  }
+  .tip b { color: var(--green); font-family: 'JetBrains Mono', monospace; }
+
+  .mistake {
+    background: rgba(248, 81, 73, 0.06);
+    border: 1px solid rgba(248, 81, 73, 0.25);
+    border-left: 4px solid var(--red);
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    margin: 1rem 0;
+  }
+  .mistake b { color: var(--red); font-family: 'JetBrains Mono', monospace; }
+
+  .mantra {
+    text-align: center;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 1.25rem;
+    margin: 2.5rem 0 1rem;
+    padding: 1.5rem;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    color: var(--text-dim);
+  }
+  .mantra strong {
+    display: block;
+    color: var(--accent-warm);
+    font-style: normal;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 0.5rem;
+  }
+
+  footer {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    font-family: 'JetBrains Mono', monospace;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back" href="index.html">← back to hub</a>
+
+  <header>
+    <div class="eyebrow">CKA · Fundamentals</div>
+    <h1>How to Guess the <span class="accent">apiVersion</span></h1>
+    <p class="subtitle">Three reliable shortcuts — a mental cheat sheet, a structural rule, and the command that ends all guessing.</p>
+  </header>
+
+  <div class="key-fact">
+    <strong>The TL;DR</strong>
+    <p style="margin: 0.6rem 0 0; color: var(--text);">
+      Pod-era basics → <code>v1</code>. Workloads that manage pods → <code>apps/v1</code>. Subsystems → their own group like <code>networking.k8s.io/v1</code>. When in doubt → <code>kubectl explain &lt;kind&gt;</code>.
+    </p>
+  </div>
+
+  <h2>1 · The Mental Cheat Sheet</h2>
+  <p>Memorise this table. It covers about 90% of what the CKA throws at you.</p>
+
+  <table>
+    <tr><th>Resource family</th><th>apiVersion</th></tr>
+    <tr>
+      <td>Pod, Service, ConfigMap, Secret, Namespace, PV, PVC, ServiceAccount, Node, Endpoints, ReplicationController, Event</td>
+      <td class="api">v1</td>
+    </tr>
+    <tr>
+      <td>Deployment, StatefulSet, DaemonSet, ReplicaSet</td>
+      <td class="api">apps/v1</td>
+    </tr>
+    <tr>
+      <td>Job, CronJob</td>
+      <td class="api">batch/v1</td>
+    </tr>
+    <tr>
+      <td>Ingress, NetworkPolicy, IngressClass</td>
+      <td class="api">networking.k8s.io/v1</td>
+    </tr>
+    <tr>
+      <td>Role, RoleBinding, ClusterRole, ClusterRoleBinding</td>
+      <td class="api">rbac.authorization.k8s.io/v1</td>
+    </tr>
+    <tr>
+      <td>HorizontalPodAutoscaler</td>
+      <td class="api">autoscaling/v2</td>
+    </tr>
+    <tr>
+      <td>PodDisruptionBudget</td>
+      <td class="api">policy/v1</td>
+    </tr>
+    <tr>
+      <td>StorageClass, VolumeAttachment, CSIDriver</td>
+      <td class="api">storage.k8s.io/v1</td>
+    </tr>
+    <tr>
+      <td>CustomResourceDefinition</td>
+      <td class="api">apiextensions.k8s.io/v1</td>
+    </tr>
+    <tr>
+      <td>Lease</td>
+      <td class="api">coordination.k8s.io/v1</td>
+    </tr>
+    <tr>
+      <td>CertificateSigningRequest</td>
+      <td class="api">certificates.k8s.io/v1</td>
+    </tr>
+  </table>
+
+  <h2>2 · The Structural Rule</h2>
+  <p>If you can't recall a row, derive it from the kind. Three patterns explain almost everything:</p>
+
+  <div class="scenario story">
+    <span class="label">pattern · pod-era primitives</span>
+    <h3>"Old / fundamental" → bare <code>v1</code></h3>
+    <p>The original Kubernetes objects — the things invented alongside the Pod itself — live in the <em>core</em> API group, which has no group name. They show up in YAML as just <code>apiVersion: v1</code>.</p>
+    <p><b>Tell:</b> can you imagine running this on day one of Kubernetes? Pod, Service, ConfigMap, Secret, Namespace, PV/PVC, ServiceAccount → all <code>v1</code>.</p>
+  </div>
+
+  <div class="scenario info">
+    <span class="label">pattern · workloads</span>
+    <h3>"Manages or scales pods" → <code>apps/v1</code></h3>
+    <p>Anything whose job is to <em>run pods on your behalf</em> sits in the <code>apps</code> group: Deployment, StatefulSet, DaemonSet, ReplicaSet. They were extracted out of core when controllers grew up.</p>
+    <p><b>Tell:</b> if removing the object would also remove its pods, it's probably <code>apps/v1</code>.</p>
+  </div>
+
+  <div class="scenario good">
+    <span class="label">pattern · subsystems</span>
+    <h3>"Whole topic" → its own named group</h3>
+    <p>Bigger areas of Kubernetes get their own group whose name reads like the topic. The version suffix is almost always <code>/v1</code>.</p>
+    <ul>
+      <li>Networking → <code>networking.k8s.io/v1</code></li>
+      <li>RBAC → <code>rbac.authorization.k8s.io/v1</code></li>
+      <li>Storage → <code>storage.k8s.io/v1</code></li>
+      <li>Certificates → <code>certificates.k8s.io/v1</code></li>
+      <li>Admission webhooks → <code>admissionregistration.k8s.io/v1</code></li>
+      <li>CRDs → <code>apiextensions.k8s.io/v1</code></li>
+    </ul>
+    <p><b>Tell:</b> the topic name is right there in the group name.</p>
+  </div>
+
+  <div class="scenario warn">
+    <span class="label">pattern · the historical outliers</span>
+    <h3>Short group names without <code>.k8s.io</code></h3>
+    <p>A handful of groups predate the <code>.k8s.io</code> naming convention and never got renamed: <code>apps</code>, <code>batch</code>, <code>policy</code>, <code>autoscaling</code>. Don't overthink it — just memorise these four short names.</p>
+  </div>
+
+  <h2>3 · Stop Guessing — Ask the Cluster</h2>
+  <p>In the exam, you have a live cluster. Use it.</p>
+
+<pre><code># The fastest way: prints apiVersion on line 2
+kubectl explain pod         | head -2
+kubectl explain deployment  | head -2
+kubectl explain ingress     | head -2
+kubectl explain hpa         | head -2
+
+# Full list — every kind, its apiVersion, namespaced or not
+kubectl api-resources
+
+# All API versions enabled on this cluster
+kubectl api-versions
+
+# Best of all: scaffold a manifest with the right apiVersion baked in
+kubectl create deployment web --image=nginx --dry-run=client -o yaml
+kubectl run nginx --image=nginx --dry-run=client -o yaml
+kubectl create job hello --image=busybox --dry-run=client -o yaml -- echo hi
+kubectl create cronjob hi --image=busybox --schedule='*/5 * * * *' \
+        --dry-run=client -o yaml -- echo hi
+kubectl create role dev --verb=get,list --resource=pods --dry-run=client -o yaml</code></pre>
+
+  <div class="tip">
+    <b>✓ Exam habit —</b> never type a manifest from scratch. Always start with <code>kubectl create … --dry-run=client -o yaml &gt; file.yaml</code>, then edit. The right <code>apiVersion</code> is already there.
+  </div>
+
+  <h2>Version Suffix — Quick Notes</h2>
+  <p>The bit after the slash (<code>/v1</code>, <code>/v1beta1</code>, etc.) tells you the maturity:</p>
+
+  <table>
+    <tr><th>Suffix</th><th>Meaning</th><th>Use in production?</th></tr>
+    <tr><td><span class="pill green">v1</span></td><td>Stable. API guarantees apply.</td><td>Yes</td></tr>
+    <tr><td><span class="pill blue">v2</span></td><td>Stable, second iteration of an API (e.g., HPA).</td><td>Yes</td></tr>
+    <tr><td><span class="pill yellow">v1beta1 / v1beta2</span></td><td>Beta — feature complete but may still change.</td><td>Mostly OK</td></tr>
+    <tr><td><span class="pill purple">v1alpha1</span></td><td>Alpha — experimental. Off by default. Can break.</td><td>No</td></tr>
+  </table>
+
+  <h2>The Three Most-Confused Pairs</h2>
+
+  <div class="mistake">
+    <b>✗ Pitfall 1 —</b> Writing <code>apiVersion: apps/v1</code> for a Pod or Service.
+    <br>Pods and Services are core — just <code>v1</code>. The <code>apps/</code> prefix is only for workload <em>controllers</em>.
+  </div>
+
+  <div class="mistake">
+    <b>✗ Pitfall 2 —</b> Using <code>extensions/v1beta1</code> for Ingress or Deployment.
+    <br>That group was deprecated and removed in 1.16+. Modern: Deployment → <code>apps/v1</code>, Ingress → <code>networking.k8s.io/v1</code>.
+  </div>
+
+  <div class="mistake">
+    <b>✗ Pitfall 3 —</b> Writing <code>autoscaling/v1</code> for an HPA with custom metrics.
+    <br><code>v1</code> only supports CPU. Use <code>autoscaling/v2</code> for memory, custom, or external metrics.
+  </div>
+
+  <h2>One-Glance Decision Tree</h2>
+
+<pre><code>What kind am I writing?
+│
+├─ Pod, Service, ConfigMap, Secret, Namespace, PV/PVC, SA?
+│     → apiVersion: v1
+│
+├─ Deployment, StatefulSet, DaemonSet, ReplicaSet?
+│     → apiVersion: apps/v1
+│
+├─ Job, CronJob?
+│     → apiVersion: batch/v1
+│
+├─ Ingress, NetworkPolicy?
+│     → apiVersion: networking.k8s.io/v1
+│
+├─ Role / Binding (any flavour)?
+│     → apiVersion: rbac.authorization.k8s.io/v1
+│
+├─ HPA?
+│     → apiVersion: autoscaling/v2
+│
+└─ Anything else?
+      → kubectl explain &lt;kind&gt; | head -2</code></pre>
+
+  <h2>Imperative Quick Commands for CKA Exam</h2>
+
+<pre><code># Discover apiVersion/kind from the cluster
+kubectl api-resources | grep -i deployment
+kubectl api-resources | grep -i priority
+
+# Ask Kubernetes for the exact field tree
+kubectl explain deployment
+kubectl explain deployment.spec.template.spec.containers
+kubectl explain priorityclass
+
+# Generate YAML and inspect apiVersion/kind
+kubectl create deployment nginx --image=nginx --dry-run=client -o yaml
+kubectl run nginx --image=nginx --dry-run=client -o yaml
+kubectl create job hello --image=busybox --dry-run=client -o yaml -- echo hi</code></pre>
+
+  <div class="mantra">
+    <strong>The Mantra</strong>
+    "Core is v1. Workloads are apps/v1. Subsystems own their group."
+  </div>
+
+  <footer>cka_notes / fundamentals / apiversion_guide.html</footer>
+
+</div>
+</body>
+</html>

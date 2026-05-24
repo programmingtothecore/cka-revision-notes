@@ -1,0 +1,23 @@
+.DS_Store
+Thumbs.db
+
+# Local editor/workspace files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs and temporary files
+*.log
+tmp/
+temp/
+
+# Do not commit real cluster credentials or keys.
+# Keep example YAML in the repo, but keep live certs/kubeconfigs out.
+*.key
+*.pem
+*.crt
+*kubeconfig*
+kubeconf*.yaml
+admin.conf
+

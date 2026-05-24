@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CKA Revision Flow — The Path</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface-2: #1c2128;
+    --border: #30363d;
+    --border-glow: #58a6ff;
+    --text: #e6edf3;
+    --text-dim: #8b949e;
+    --accent: #58a6ff;
+    --accent-deep: #326ce5;
+    --warm: #f0883e;
+    --green: #3fb950;
+    --yellow: #e3b341;
+    --purple: #bc8cff;
+    --pink: #ff7b72;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+    padding: 3rem 1.25rem 6rem;
+    overflow-x: hidden;
+    background-image:
+      radial-gradient(circle at 15% 8%, rgba(88, 166, 255, 0.10), transparent 45%),
+      radial-gradient(circle at 85% 95%, rgba(240, 136, 62, 0.06), transparent 45%),
+      radial-gradient(circle at 50% 50%, rgba(188, 140, 255, 0.04), transparent 70%);
+  }
+
+  /* ─── Floating particle layer ─────────────────────────── */
+  .particles {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+  .particle {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 6px var(--accent);
+    opacity: 0;
+    animation: float 14s linear infinite;
+  }
+  .particle:nth-child(1) { left: 10%; animation-delay: 0s;   background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+  .particle:nth-child(2) { left: 25%; animation-delay: 2s;   background: var(--purple); box-shadow: 0 0 8px var(--purple); }
+  .particle:nth-child(3) { left: 40%; animation-delay: 4s;   background: var(--warm);   box-shadow: 0 0 8px var(--warm); }
+  .particle:nth-child(4) { left: 55%; animation-delay: 6s;   background: var(--green);  box-shadow: 0 0 8px var(--green); }
+  .particle:nth-child(5) { left: 70%; animation-delay: 8s;   background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+  .particle:nth-child(6) { left: 85%; animation-delay: 10s;  background: var(--purple); box-shadow: 0 0 8px var(--purple); }
+  .particle:nth-child(7) { left: 18%; animation-delay: 12s;  background: var(--yellow); box-shadow: 0 0 8px var(--yellow); }
+  .particle:nth-child(8) { left: 62%; animation-delay: 1s;   background: var(--pink);   box-shadow: 0 0 8px var(--pink); }
+  @keyframes float {
+    0%   { transform: translateY(110vh) scale(0.5); opacity: 0; }
+    10%  { opacity: 0.8; }
+    90%  { opacity: 0.8; }
+    100% { transform: translateY(-10vh) scale(1.2);  opacity: 0; }
+  }
+
+  .container {
+    max-width: 980px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ─── Header ──────────────────────────────────────────── */
+  header {
+    text-align: center;
+    margin-bottom: 4rem;
+    padding-bottom: 2rem;
+  }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--accent);
+    background: rgba(50, 108, 229, 0.12);
+    border: 1px solid rgba(50, 108, 229, 0.3);
+    padding: 0.4rem 0.95rem;
+    border-radius: 999px;
+    margin-bottom: 1.4rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    animation: pillGlow 3s ease-in-out infinite;
+  }
+  .pill::before {
+    content: "⎈";
+    font-size: 1rem;
+    animation: spin 14s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes pillGlow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(50, 108, 229, 0.35); }
+    50%      { box-shadow: 0 0 22px 2px rgba(50, 108, 229, 0.25); }
+  }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(2.1rem, 5vw, 3.2rem);
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 0.7rem;
+    background: linear-gradient(135deg, #58a6ff 0%, #bc8cff 50%, #f0883e 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    background-size: 200% 200%;
+    animation: gradientShift 8s ease-in-out infinite;
+  }
+  @keyframes gradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50%      { background-position: 100% 50%; }
+  }
+
+  .tagline {
+    color: var(--text-dim);
+    font-size: 1.05rem;
+    max-width: 560px;
+    margin: 0 auto 1.8rem;
+  }
+
+  .meta-row {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+  }
+  .meta-row strong { color: var(--text); font-weight: 600; }
+  .meta-row span { display: inline-flex; align-items: center; gap: 0.4rem; }
+
+  /* ─── Progress bar ───────────────────────────────────── */
+  .progress-wrap {
+    margin: 2.2rem auto 0;
+    max-width: 540px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    height: 8px;
+    overflow: hidden;
+    position: relative;
+  }
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--purple), var(--warm));
+    background-size: 200% 100%;
+    width: 0%;
+    transition: width 0.4s ease;
+    animation: barShimmer 4s linear infinite;
+    border-radius: 999px;
+  }
+  @keyframes barShimmer {
+    0%   { background-position: 0% 0; }
+    100% { background-position: 200% 0; }
+  }
+  .progress-label {
+    margin-top: 0.6rem;
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+  }
+
+  /* ─── Pipeline ────────────────────────────────────────── */
+  .pipeline {
+    position: relative;
+    padding: 2rem 0;
+  }
+
+  /* The vertical "track" line behind everything */
+  .pipeline::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 36px;
+    width: 2px;
+    background: linear-gradient(180deg,
+      transparent 0%,
+      var(--border) 4%,
+      var(--border) 96%,
+      transparent 100%);
+  }
+
+  /* Animated traveling pulse on the track */
+  .pipeline::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 32px;
+    width: 10px;
+    height: 80px;
+    background: linear-gradient(180deg, transparent, var(--accent), transparent);
+    filter: blur(3px);
+    border-radius: 999px;
+    animation: travel 9s ease-in-out infinite;
+    opacity: 0.7;
+  }
+  @keyframes travel {
+    0%   { top: -80px;  opacity: 0; }
+    10%  { opacity: 1; }
+    90%  { opacity: 1; }
+    100% { top: 100%;   opacity: 0; }
+  }
+
+  /* ─── Stage label ─────────────────────────────────────── */
+  .stage {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding-left: 4.75rem;
+    margin: 2.5rem 0 1.5rem;
+  }
+  .stage:first-child { margin-top: 0.5rem; }
+
+  .stage-icon {
+    position: absolute;
+    left: 13px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    z-index: 2;
+  }
+  .stage-1 .stage-icon { border-color: var(--green);  color: var(--green);  box-shadow: 0 0 18px rgba(63,185,80,0.25); }
+  .stage-2 .stage-icon { border-color: var(--warm);   color: var(--warm);   box-shadow: 0 0 18px rgba(240,136,62,0.25); }
+  .stage-3 .stage-icon { border-color: var(--accent); color: var(--accent); box-shadow: 0 0 18px rgba(88,166,255,0.25); }
+  .stage-4 .stage-icon { border-color: var(--purple); color: var(--purple); box-shadow: 0 0 18px rgba(188,140,255,0.25); }
+
+  .stage-text h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+  }
+  .stage-text p {
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    font-family: 'JetBrains Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  /* ─── Stations (the cards along the rail) ─────────────── */
+  .station {
+    position: relative;
+    display: block;
+    padding-left: 4.75rem;
+    padding-right: 0.5rem;
+    margin: 1rem 0;
+    text-decoration: none;
+    color: inherit;
+    opacity: 0;
+    transform: translateX(-20px);
+    animation: slideIn 0.6s ease forwards;
+  }
+  .station:nth-child(odd)  { animation-delay: 0.1s; }
+  .station:nth-child(even) { animation-delay: 0.2s; }
+  @keyframes slideIn {
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  /* Numbered node on the rail */
+  .node {
+    position: absolute;
+    left: 13px;
+    top: 26px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-dim);
+    z-index: 2;
+    transition: all 0.25s ease;
+  }
+  .node::before {
+    content: "";
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+    background: var(--node-color, var(--accent));
+    opacity: 0;
+    filter: blur(8px);
+    transition: opacity 0.25s ease;
+    z-index: -1;
+  }
+
+  .station:hover .node {
+    border-color: var(--node-color, var(--accent));
+    color: var(--node-color, var(--accent));
+    transform: scale(1.1);
+  }
+  .station:hover .node::before { opacity: 0.5; }
+
+  /* The card body next to each station */
+  .card {
+    background: linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.2rem 1.4rem;
+    transition: all 0.25s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--node-color, var(--accent));
+    opacity: 0.7;
+    transition: width 0.25s ease;
+  }
+  .station:hover .card {
+    border-color: var(--node-color, var(--accent));
+    background: linear-gradient(135deg, var(--surface-2) 0%, var(--surface) 100%);
+    transform: translateX(4px);
+    box-shadow: 0 10px 28px rgba(0,0,0,0.45),
+                0 0 0 1px rgba(255,255,255,0.02);
+  }
+  .station:hover .card::before { width: 5px; }
+
+  .card-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.45rem;
+  }
+  .card h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.18rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--text);
+  }
+  .card .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 0.2rem 0.55rem;
+    border-radius: 4px;
+    font-weight: 600;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .tag.story        { background: rgba(188,140,255,0.15); color: var(--purple); }
+  .tag.scheduling   { background: rgba(88,166,255,0.15);  color: var(--accent); }
+  .tag.workload     { background: rgba(240,136,62,0.15);  color: var(--warm); }
+  .tag.resource     { background: rgba(63,185,80,0.15);   color: var(--green); }
+  .tag.fundamental  { background: rgba(227,179,65,0.15);  color: var(--yellow); }
+
+  .card p {
+    color: var(--text-dim);
+    font-size: 0.92rem;
+    line-height: 1.55;
+    margin-bottom: 0.65rem;
+  }
+  .card p code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.86em;
+    background: rgba(110, 118, 129, 0.15);
+    padding: 0.1em 0.35em;
+    border-radius: 3px;
+    color: var(--accent);
+  }
+
+  .card-foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 0.65rem;
+    border-top: 1px dashed var(--border);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.74rem;
+    color: var(--text-dim);
+  }
+  .card-foot .file::before { content: "📄  "; }
+  .card-foot .arrow {
+    color: var(--text-dim);
+    transition: transform 0.25s, color 0.25s;
+    font-weight: 700;
+  }
+  .station:hover .card-foot .arrow {
+    color: var(--node-color, var(--accent));
+    transform: translateX(6px);
+  }
+
+  /* ─── Connector "drop" between stations ───────────────── */
+  .connector {
+    position: relative;
+    margin-left: 36px;
+    height: 22px;
+    width: 2px;
+  }
+  .connector::after {
+    content: "▼";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--text-dim);
+    font-size: 0.55rem;
+    background: var(--bg);
+    padding: 1px 2px;
+    opacity: 0.5;
+  }
+
+  /* ─── Finish marker ────────────────────────────────────── */
+  .finish {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding-left: 4.75rem;
+    margin-top: 2.5rem;
+    padding-top: 1rem;
+  }
+  .finish .stage-icon {
+    background: linear-gradient(135deg, var(--green), var(--accent));
+    border-color: transparent;
+    color: var(--bg);
+    font-size: 1.2rem;
+    animation: trophyPulse 2.5s ease-in-out infinite;
+  }
+  @keyframes trophyPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(63,185,80,0.45); }
+    50%      { box-shadow: 0 0 0 14px rgba(63,185,80,0); }
+  }
+  .finish-text h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.4rem;
+    background: linear-gradient(135deg, var(--green), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .finish-text p {
+    color: var(--text-dim);
+    font-size: 0.9rem;
+  }
+
+  /* ─── Footer ──────────────────────────────────────────── */
+  footer {
+    margin-top: 4rem;
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 0.82rem;
+    font-family: 'JetBrains Mono', monospace;
+    line-height: 1.7;
+  }
+  footer .keys {
+    display: inline-flex;
+    gap: 0.4rem;
+    align-items: center;
+  }
+  footer kbd {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-bottom-width: 2px;
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 0.78rem;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  footer a {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px dotted var(--accent);
+  }
+
+  /* ─── Visited state (uses :target via small JS later) ── */
+  .station.visited .node {
+    background: var(--node-color, var(--accent));
+    color: var(--bg);
+    border-color: var(--node-color, var(--accent));
+  }
+  .station.visited .node::after {
+    content: "✓";
+    position: absolute;
+    font-size: 0.9rem;
+  }
+  .station.visited .node-num { display: none; }
+
+  /* Responsive tweaks */
+  @media (max-width: 600px) {
+    body { padding: 2rem 1rem 4rem; }
+    .pipeline::before { left: 24px; }
+    .pipeline::after  { left: 20px; }
+    .stage, .station, .finish { padding-left: 3.6rem; }
+    .stage-icon, .node { left: 0; width: 40px; height: 40px; font-size: 0.85rem; }
+    .node { top: 22px; }
+    .connector { margin-left: 24px; }
+    h1 { font-size: 2rem; }
+    .meta-row { gap: 0.8rem; font-size: 0.72rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="particles" aria-hidden="true">
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+</div>
+
+<div class="container">
+
+  <header>
+    <div class="pill">CKA · Revision Pipeline</div>
+    <h1>The Path Through Kubernetes</h1>
+    <p class="tagline">
+      A recommended order to revise every topic. Start at <strong>1</strong>, walk down the rail,
+      end with the workloads. Each station opens its full note.
+    </p>
+    <div class="meta-row">
+      <span>📚 <strong id="metaStations">0</strong> stations</span>
+      <span>🧭 <strong id="metaStages">0</strong> stages</span>
+      <span>⏱ ~<strong id="metaTime">2&nbsp;hrs</strong> full pass</span>
+      <span>🔄 last updated <strong id="metaUpdated">May&nbsp;2026</strong></span>
+    </div>
+    <div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div>
+    <div class="progress-label" id="progressLabel">0 / 0 visited</div>
+  </header>
+
+  <!-- Pipeline is rendered from the PIPELINE config in the script below. -->
+  <div class="pipeline" id="pipeline"></div>
+
+  <div class="finish">
+    <div class="stage-icon">⚡</div>
+    <div class="finish-text">
+      <h2>Imperative Quick Commands for CKA Exam</h2>
+      <p>Use the <a href="cka-imperative-commands-cheatsheet.html" style="color: var(--accent); text-decoration: none; border-bottom: 1px dotted var(--accent);">one-glance imperative cheat sheet</a> when you need the fastest command-first revision pass.</p>
+    </div>
+  </div>
+
+  <footer>
+    <p>Tip: every visit gets a green ✓ on its node — your progress saves locally.</p>
+    <p style="margin-top: 0.6rem;">
+      <span class="keys"><kbd>R</kbd> reset progress</span>
+      &nbsp;·&nbsp;
+      <span class="keys"><kbd>↓</kbd> next station</span>
+      &nbsp;·&nbsp;
+      <a href="index.html">grid index</a>
+    </p>
+  </footer>
+
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════════════════
+ * 🛠  TO ADD A NEW NOTE
+ * ────────────────────────────────────────────────────────────────
+ *  1. Drop your new HTML file into this same folder.
+ *  2. Add ONE entry to the right stage's `stations` array below
+ *     (or define a new stage). Numbering, colors, connectors,
+ *     stage counts, progress bar — all auto-update.
+ *
+ *  station shape:
+ *    { href:  'your-file.html',         // required
+ *      title: 'Display title',          // required (HTML allowed)
+ *      desc:  'One-line description',   // required (HTML allowed)
+ *      tag:   'Story' }                 // optional, falls back to stage.tag
+ *
+ *  stage shape:
+ *    { id:    'kebab-case',             // required, stable identifier
+ *      icon:  '🌱',                     // required, single emoji
+ *      title: 'Stage Name',             // required
+ *      sub:   'Stage 1 · ...',          // required
+ *      color: '#3fb950',                // required, css color
+ *      tag:   'Fundamentals',           // default tag label for stations
+ *      tagClass: 'fundamental',         // CSS class for tag color
+ *      stations: [ ... ] }
+ *
+ *  Available tagClass values: fundamental, resource, scheduling,
+ *                             workload, story
+ * ════════════════════════════════════════════════════════════════ */
+
+const META = {
+  estimatedTime: '2 hrs',
+  lastUpdated:   'May 2026'
+};
+
+const PIPELINE = [
+  {
+    id: 'foundations',
+    icon: '🌱',
+    title: 'Foundations',
+    sub:   'Stage 1 · build the mental model',
+    color: '#3fb950',
+    tag:   'Fundamentals',
+    tagClass: 'fundamental',
+    stations: [
+      { href: 'cka-pod-controllers-basics.html',
+        title: 'Pods &amp; Controllers — The Basics Map',
+        desc: 'Start here. The whole zoo of objects — <code>Pod</code>, <code>ReplicaSet</code>, <code>Deployment</code>, <code>DaemonSet</code>, <code>StatefulSet</code>, <code>Job</code>, <code>CronJob</code>, <code>Service</code> — and how they relate to each other on one map.' },
+      { href: 'cka-apiversion-guide.html',
+        title: 'How to Guess the apiVersion',
+        desc: 'Once you know what objects exist, learn the <code>apiVersion</code> shortcuts: the cheat sheet, the structural rule for groups, and the <code>kubectl explain</code> trick.' },
+      { href: 'cka-kubernetes-paths.html',
+        title: 'Kubernetes Paths — Files You Must Know',
+        desc: 'The map of <em>where things live</em> on a node — kubeconfigs, static pod manifests, certs, kubelet config, etcd data, logs and systemd units.' }
+    ]
+  },
+  {
+    id: 'resources',
+    icon: '⚙️',
+    title: 'Resources',
+    sub:   'Stage 2 · how a pod consumes capacity',
+    color: '#f0883e',
+    tag:   'Resources',
+    tagClass: 'resource',
+    stations: [
+      { href: 'k8s-memory-units-gi-vs-gb.html',
+        title: 'Memory Units — Gi vs GB',
+        desc: 'Why <code>1Gi ≠ 1GB</code>, what binary vs decimal prefixes mean inside resource specs, and the gotchas that turn into OOMKills.' },
+      { href: 'cka-requests-and-limits-story.html',
+        title: 'Requests &amp; Limits — The Kitchen Story',
+        tag: 'Story', tagClass: 'story',
+        desc: 'Every permutation of CPU/memory <code>requests</code> and <code>limits</code>, told through chefs in a shared kitchen. QoS classes, syntax gotchas, and when each pattern fits.' }
+    ]
+  },
+  {
+    id: 'scheduling',
+    icon: '📅',
+    title: 'Scheduling',
+    sub:   'Stage 3 · how a pod lands on a node',
+    color: '#58a6ff',
+    tag:   'Scheduling',
+    tagClass: 'scheduling',
+    stations: [
+      { href: 'cka-scheduling-story.html',
+        title: 'Selectors, Affinity &amp; Tolerations — The Story',
+        tag: 'Story', tagClass: 'story',
+        desc: 'The narrative tour of placement rules: <code>nodeSelector</code>, <code>nodeAffinity</code>, taints &amp; tolerations — told as a cast-and-acts story.' },
+      { href: 'cka-nodeaffinity-terms.html',
+        title: 'nodeAffinity — Terms vs Expressions',
+        desc: 'The AND/OR logic deep-dive: when does a new <code>matchExpression</code> mean AND, and when does a new term mean OR?' },
+      { href: 'cka-priorityclass.html',
+        title: 'PriorityClass — Priority &amp; Preemption',
+        desc: 'How Kubernetes ranks pending pods, how <code>priorityClassName</code> flows in, and when high-priority pods evict the low.' }
+    ]
+  },
+  {
+    id: 'workloads',
+    icon: '🧩',
+    title: 'Special Workloads',
+    sub:   'Stage 4 · pods that play by different rules',
+    color: '#bc8cff',
+    tag:   'Workload',
+    tagClass: 'workload',
+    stations: [
+      { href: 'cka-daemonset.html',
+        title: 'DaemonSet — One Pod Per Node',
+        desc: 'What it is, when to use it, syntax, and the dry-run-and-modify trick to ship one without the (non-existent) <code>kubectl create ds</code>.' },
+      { href: 'cka-static-pods.html',
+        title: 'Static Pods — Kubelet-Managed Pods',
+        desc: 'Pods that skip the scheduler entirely. Why control-plane components run this way, and the exam workflow for finding, editing, and recovering manifests.' }
+    ]
+  }
+];
+
+/* ──────────────────────────────────────────────────────────────
+ * Renderer — turns PIPELINE into DOM. Don't edit below unless
+ * changing layout/animation behavior.
+ * ────────────────────────────────────────────────────────────── */
+
+function el(tag, attrs = {}, ...children) {
+  const node = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === 'class')        node.className = v;
+    else if (k === 'style')   node.setAttribute('style', v);
+    else if (k === 'html')    node.innerHTML = v;
+    else if (k.startsWith('data-')) node.setAttribute(k, v);
+    else                      node[k] = v;
+  }
+  for (const c of children) {
+    if (c == null) continue;
+    node.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
+  }
+  return node;
+}
+
+function renderPipeline() {
+  const root = document.getElementById('pipeline');
+  root.innerHTML = '';
+
+  let stationCounter = 0;
+
+  PIPELINE.forEach((stage, sIdx) => {
+    // Stage header
+    const stageEl = el('div', { class: `stage stage-${sIdx + 1}` },
+      el('div', { class: 'stage-icon', style: `border-color: ${stage.color}; color: ${stage.color}; box-shadow: 0 0 18px ${stage.color}40;`, html: stage.icon }),
+      el('div', { class: 'stage-text' },
+        el('h2', { html: stage.title }),
+        el('p',  { html: stage.sub })
+      )
+    );
+    root.appendChild(stageEl);
+
+    // Stations in this stage
+    stage.stations.forEach((st, idx) => {
+      stationCounter++;
+      const num   = String(stationCounter).padStart(2, '0');
+      const tag   = st.tag      ?? stage.tag;
+      const tagCls= st.tagClass ?? stage.tagClass;
+
+      // Drop a connector before every station except the first one in this stage
+      if (idx > 0) root.appendChild(el('div', { class: 'connector' }));
+
+      const station = el('a',
+        { class: 'station', href: st.href, 'data-id': String(stationCounter),
+          style: `--node-color: ${stage.color};` },
+        el('div', { class: 'node' }, el('span', { class: 'node-num', html: num })),
+        el('div', { class: 'card' },
+          el('div', { class: 'card-row' },
+            el('h3',   { html: st.title }),
+            el('span', { class: `tag ${tagCls}`, html: tag })
+          ),
+          el('p', { html: st.desc }),
+          el('div', { class: 'card-foot' },
+            el('span', { class: 'file', html: st.href }),
+            el('span', { class: 'arrow', html: '→' })
+          )
+        )
+      );
+      root.appendChild(station);
+    });
+  });
+
+  // Finish marker
+  root.appendChild(el('div', { class: 'finish' },
+    el('div', { class: 'stage-icon', html: '🏁' }),
+    el('div', { class: 'finish-text' },
+      el('h2', { html: 'End of the line — full pass complete' }),
+      el('p',  { html: 'Refresh, hit a weak topic, or jump to the categorical <a href="index.html" style="color: var(--accent); text-decoration: none; border-bottom: 1px dotted var(--accent);">grid index</a>.' })
+    )
+  ));
+
+  // Update meta counts
+  document.getElementById('metaStations').textContent = stationCounter;
+  document.getElementById('metaStages').textContent   = PIPELINE.length;
+  document.getElementById('metaTime').innerHTML       = META.estimatedTime;
+  document.getElementById('metaUpdated').innerHTML    = META.lastUpdated;
+}
+
+/* ─── Visited tracking ───────────────────────────────────── */
+const visited = new Set();
+
+function refreshProgress() {
+  const total = document.querySelectorAll('.station').length;
+  const done  = visited.size;
+  document.getElementById('progressBar').style.width = (total ? done / total * 100 : 0) + '%';
+  document.getElementById('progressLabel').textContent = `${done} / ${total} visited`;
+
+  document.querySelectorAll('.station').forEach(stationEl => {
+    if (visited.has(stationEl.dataset.id)) stationEl.classList.add('visited');
+    else stationEl.classList.remove('visited');
+  });
+}
+
+function wireBehavior() {
+  try {
+    const saved = sessionStorage.getItem('cka-flow-visited');
+    if (saved) JSON.parse(saved).forEach(id => visited.add(id));
+  } catch (e) { /* ignore */ }
+
+  const stations = [...document.querySelectorAll('.station')];
+
+  stations.forEach(stationEl => {
+    stationEl.setAttribute('tabindex', '0');
+    stationEl.addEventListener('click', () => {
+      visited.add(stationEl.dataset.id);
+      try { sessionStorage.setItem('cka-flow-visited', JSON.stringify([...visited])); } catch (e) {}
+      refreshProgress();
+    });
+  });
+
+  // Keyboard nav
+  let currentIdx = -1;
+  document.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+    if (e.key === 'r' || e.key === 'R') {
+      visited.clear();
+      try { sessionStorage.removeItem('cka-flow-visited'); } catch (err) {}
+      refreshProgress();
+    }
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      currentIdx = Math.min(currentIdx + 1, stations.length - 1);
+      stations[currentIdx].focus();
+      stations[currentIdx].scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      currentIdx = Math.max(currentIdx - 1, 0);
+      stations[currentIdx].focus();
+      stations[currentIdx].scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  });
+
+  refreshProgress();
+}
+
+renderPipeline();
+wireBehavior();
+</script>
+
+</body>
+</html>

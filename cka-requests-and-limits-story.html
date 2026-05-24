@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CKA Revision — Requests &amp; Limits: The Kitchen Story</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface-2: #1c2128;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text-dim: #8b949e;
+    --accent: #58a6ff;
+    --accent-warm: #f0883e;
+    --green: #3fb950;
+    --red: #f85149;
+    --yellow: #e3b341;
+    --purple: #bc8cff;
+    --code-bg: #010409;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    line-height: 1.7;
+    padding: 2rem 1.5rem 5rem;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(circle at 15% 10%, rgba(88, 166, 255, 0.08), transparent 40%),
+      radial-gradient(circle at 85% 80%, rgba(240, 136, 62, 0.06), transparent 40%);
+  }
+
+  .container { max-width: 860px; margin: 0 auto; }
+
+  .back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--text-dim);
+    text-decoration: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    margin-bottom: 1.5rem;
+    transition: color 0.15s;
+  }
+  .back:hover { color: var(--accent); }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1.5rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 0.75rem;
+  }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 800;
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+  h1 .accent { color: var(--accent-warm); font-style: italic; }
+
+  .subtitle {
+    color: var(--text-dim);
+    margin-top: 0.75rem;
+    font-size: 1.05rem;
+  }
+
+  h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.6rem;
+    font-weight: 600;
+    margin-top: 3rem;
+    margin-bottom: 1rem;
+    letter-spacing: -0.01em;
+  }
+  h2::before {
+    content: "§ ";
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9em;
+  }
+
+  h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-top: 1.75rem;
+    margin-bottom: 0.6rem;
+    color: var(--text);
+  }
+
+  p { margin-bottom: 1rem; }
+  ul, ol { margin: 0.5rem 0 1.25rem 1.4rem; }
+  li { margin-bottom: 0.4rem; }
+
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--code-bg);
+    color: var(--accent-warm);
+    padding: 0.15em 0.4em;
+    border-radius: 4px;
+    font-size: 0.88em;
+    border: 1px solid var(--border);
+  }
+
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    overflow-x: auto;
+    margin: 1rem 0 1.5rem;
+  }
+  pre code {
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--text);
+    font-size: 0.85rem;
+    line-height: 1.6;
+  }
+
+  .cast {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.25rem 1.5rem;
+    margin: 1.5rem 0;
+  }
+  .cast h3 { margin-top: 0; color: var(--accent); }
+  .cast ul { list-style: none; margin-left: 0; }
+  .cast li { padding: 0.45rem 0; border-bottom: 1px dashed var(--border); }
+  .cast li:last-child { border-bottom: none; }
+  .cast b { color: var(--accent-warm); font-family: 'JetBrains Mono', monospace; font-size: 0.92em; }
+
+  .scenario {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem 1.5rem;
+    margin: 1.25rem 0;
+    border-left: 4px solid var(--scenario-color, var(--accent));
+  }
+  .scenario .label {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--scenario-color, var(--accent));
+    background: rgba(88, 166, 255, 0.08);
+    padding: 0.2rem 0.55rem;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+  }
+  .scenario h3 { margin-top: 0; }
+
+  .scenario.good { --scenario-color: var(--green); }
+  .scenario.warn { --scenario-color: var(--yellow); }
+  .scenario.bad  { --scenario-color: var(--red); }
+  .scenario.info { --scenario-color: var(--accent); }
+
+  .key-fact {
+    background: linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent-warm);
+    padding: 1.1rem 1.5rem;
+    border-radius: 6px;
+    margin: 1.5rem 0;
+  }
+  .key-fact strong {
+    color: var(--accent-warm);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0 1.5rem;
+    background: var(--surface);
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    font-size: 0.92rem;
+  }
+  th, td {
+    text-align: left;
+    padding: 0.7rem 0.9rem;
+    border-bottom: 1px solid var(--border);
+  }
+  th {
+    background: var(--surface-2);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-dim);
+  }
+  tr:last-child td { border-bottom: none; }
+  td .pill {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+  }
+  .pill.green  { background: rgba(63, 185, 80, 0.15);  color: var(--green); }
+  .pill.yellow { background: rgba(227, 179, 65, 0.15); color: var(--yellow); }
+  .pill.red    { background: rgba(248, 81, 73, 0.15);  color: var(--red); }
+  .pill.blue   { background: rgba(88, 166, 255, 0.15); color: var(--accent); }
+
+  .mistake {
+    background: rgba(248, 81, 73, 0.06);
+    border: 1px solid rgba(248, 81, 73, 0.25);
+    border-left: 4px solid var(--red);
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    margin: 1rem 0;
+  }
+  .mistake b { color: var(--red); font-family: 'JetBrains Mono', monospace; }
+
+  .tip {
+    background: rgba(63, 185, 80, 0.06);
+    border: 1px solid rgba(63, 185, 80, 0.25);
+    border-left: 4px solid var(--green);
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    margin: 1rem 0;
+  }
+  .tip b { color: var(--green); font-family: 'JetBrains Mono', monospace; }
+
+  .vs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin: 1rem 0 1.5rem;
+  }
+  .vs > div {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+  }
+  .vs h4 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .vs .red-h h4 { color: var(--red); }
+
+  @media (max-width: 600px) {
+    .vs { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back" href="index.html">← back to hub</a>
+
+  <header>
+    <div class="eyebrow">CKA · Resources</div>
+    <h1>Requests &amp; Limits — <span class="accent">The Kitchen Story</span></h1>
+    <p class="subtitle">Every permutation of CPU and memory requests/limits, told through chefs in a shared kitchen. With syntax, gotchas, and exam-grade rules.</p>
+  </header>
+
+  <h2>Setting the Scene</h2>
+  <p>Picture a <b>shared restaurant kitchen</b>. The kitchen is your <code>Node</code>. The <b>chefs</b> are your <code>Pods</code>. They share two finite things:</p>
+
+  <div class="cast">
+    <h3>The Cast</h3>
+    <ul>
+      <li><b>CPU</b> = the stove burners. <em>Compressible.</em> If a chef wants more, the others can take turns. Nobody dies, they just cook slower.</li>
+      <li><b>Memory</b> = the countertop space. <em>Incompressible.</em> If you've laid out ingredients on it, you can't "share" it. If it's full and someone needs more, somebody gets thrown out of the kitchen.</li>
+      <li><b>request</b> = "I need <em>at least</em> this much reserved before I'll even start." Used by the <b>scheduler</b> to pick a node.</li>
+      <li><b>limit</b> = "I will <em>never</em> use more than this." Enforced at runtime by the <b>kubelet via cgroups</b>.</li>
+    </ul>
+  </div>
+
+  <div class="key-fact">
+    <strong>One sentence to remember:</strong> <em>request</em> is a promise the scheduler makes to your pod. <em>limit</em> is a leash the kubelet puts on your pod.
+  </div>
+
+  <h2>The Four Scenarios (per resource)</h2>
+  <p>For each of CPU and memory, you have four ways to configure a container:</p>
+
+  <table>
+    <tr><th>request</th><th>limit</th><th>What happens</th><th>QoS</th></tr>
+    <tr><td>—</td><td>—</td><td>Free-for-all. First to be killed.</td><td><span class="pill red">BestEffort</span></td></tr>
+    <tr><td>set</td><td>—</td><td>Reserved minimum, no ceiling.</td><td><span class="pill yellow">Burstable</span></td></tr>
+    <tr><td>—</td><td>set</td><td>K8s auto-copies limit → request.</td><td><span class="pill yellow">Burstable</span></td></tr>
+    <tr><td>set</td><td>set (≠)</td><td>Reserved floor, hard ceiling.</td><td><span class="pill yellow">Burstable</span></td></tr>
+    <tr><td>set</td><td>set (=)</td><td>Locked-in for both. Safest.</td><td><span class="pill green">Guaranteed</span></td></tr>
+  </table>
+
+  <h2>Story Mode: Five Chefs Walk Into a Kitchen</h2>
+
+  <div class="scenario bad">
+    <span class="label">scenario 1 · neither set</span>
+    <h3>Chef Carla — "Just let me cook"</h3>
+    <p>Carla shows up with no booking. She'll grab whatever burner is free and spread her ingredients wherever there's space. Sounds chill — until the kitchen gets busy.</p>
+    <ul>
+      <li>The <b>scheduler</b> will place her almost anywhere; it doesn't know what she needs.</li>
+      <li>If memory pressure hits the node, the kubelet evicts pods <b>BestEffort first</b>. Carla goes first.</li>
+      <li>She can also accidentally <em>starve</em> a more important pod by eating all the free CPU.</li>
+    </ul>
+    <p><b>When it's OK:</b> dev/test, throwaway jobs, demos. <b>Never in prod.</b></p>
+<pre><code># No resources block at all
+spec:
+  containers:
+    - name: app
+      image: nginx</code></pre>
+  </div>
+
+  <div class="scenario warn">
+    <span class="label">scenario 2 · request only</span>
+    <h3>Chef Ravi — "Reserve me a burner, I'll figure out the rest"</h3>
+    <p>Ravi books one burner up front. The scheduler guarantees he gets it. But because there's no limit, on a quiet night he'll spread across <em>every</em> free burner.</p>
+    <ul>
+      <li><b>Pros:</b> guaranteed minimum, can <em>burst</em> when the node has spare capacity. Great for spiky workloads.</li>
+      <li><b>Cons (CPU):</b> noisy-neighbor risk. He may hog CPU until another pod requests it.</li>
+      <li><b>Cons (memory):</b> dangerous. He can grow until the <em>node</em> runs out of memory, triggering evictions or even <code>OOMKilled</code> on neighbours. The node itself can become <code>NotReady</code>.</li>
+    </ul>
+    <p><b>When it's OK:</b> CPU-only request for bursty workloads on under-utilised nodes. <b>Avoid for memory</b> in shared clusters.</p>
+<pre><code>resources:
+  requests:
+    cpu: "250m"
+    memory: "256Mi"
+  # no limits</code></pre>
+  </div>
+
+  <div class="scenario info">
+    <span class="label">scenario 3 · limit only</span>
+    <h3>Chef Mei — "I won't take more than this"</h3>
+    <p>Mei sets a ceiling but doesn't book. Kubernetes does her a favour: it <b>auto-copies the limit into the request</b>. So she's effectively in scenario 5 (request = limit).</p>
+    <ul>
+      <li>Looks like the most restrictive case but it's actually the safest — she gets exactly what she asked for, no more, no less.</li>
+      <li>Resulting QoS is often <span class="pill green">Guaranteed</span> (if both CPU <em>and</em> memory have only limits, both copied = both equal).</li>
+    </ul>
+<pre><code>resources:
+  limits:
+    cpu: "500m"
+    memory: "512Mi"
+# scheduler treats requests as 500m / 512Mi too</code></pre>
+  </div>
+
+  <div class="scenario warn">
+    <span class="label">scenario 4 · request &lt; limit</span>
+    <h3>Chef Diego — "Reserve one burner, I might use up to three"</h3>
+    <p>Diego books a minimum and accepts a ceiling. This is the <b>most common production pattern</b>.</p>
+    <ul>
+      <li>Scheduler reserves the <em>request</em>; kubelet enforces the <em>limit</em>.</li>
+      <li>Burstable: he can grow when the node is quiet, gets throttled / killed at the limit.</li>
+      <li><b>Tuning rule of thumb:</b> request ≈ p50 usage, limit ≈ p99 + buffer.</li>
+    </ul>
+<pre><code>resources:
+  requests:
+    cpu: "200m"
+    memory: "256Mi"
+  limits:
+    cpu: "500m"
+    memory: "512Mi"</code></pre>
+  </div>
+
+  <div class="scenario good">
+    <span class="label">scenario 5 · request = limit</span>
+    <h3>Chef Priya — "Lock it in"</h3>
+    <p>Priya books exactly what she'll use. No bursting, no surprises.</p>
+    <ul>
+      <li>QoS = <span class="pill green">Guaranteed</span> (only when <em>both</em> CPU and memory have request = limit for <em>every</em> container).</li>
+      <li>Last to be evicted under pressure. Predictable performance.</li>
+      <li>Lower utilisation — you pay for capacity you might not use.</li>
+    </ul>
+    <p><b>When to use:</b> latency-sensitive workloads, databases, anything that hates being throttled.</p>
+<pre><code>resources:
+  requests:
+    cpu: "500m"
+    memory: "512Mi"
+  limits:
+    cpu: "500m"
+    memory: "512Mi"</code></pre>
+  </div>
+
+  <h2>The Critical Difference: CPU vs Memory at the Limit</h2>
+  <p>This is the <em>one</em> thing the exam loves to probe. What happens when you hit the limit depends on which resource you're talking about.</p>
+
+  <div class="vs">
+    <div>
+      <h4>CPU — compressible</h4>
+      <p>Hits limit → container gets <b>throttled</b>. Slowed down, but stays alive. No restart. You'll see high CPU throttling metrics.</p>
+    </div>
+    <div class="red-h">
+      <h4>Memory — incompressible</h4>
+      <p>Hits limit → container is <b>OOMKilled</b>. Process killed, container restarts (per restartPolicy). Pod's <code>RESTARTS</code> count goes up.</p>
+    </div>
+  </div>
+
+  <div class="key-fact">
+    <strong>Mnemonic:</strong> <em>"CPU slows, memory dies."</em> You can throttle a stovetop. You can't throttle a countertop — you have to clear it.
+  </div>
+
+  <h2>Where It Goes in the YAML</h2>
+  <p>Resources live <b>per container</b>, inside <code>spec.containers[]</code>. Not on the pod, not on the spec. Each container in a pod has its own block.</p>
+
+<pre><code>apiVersion: v1
+kind: Pod
+metadata:
+  name: web
+spec:
+  containers:
+    - name: app
+      image: nginx:1.27
+      resources:                    # &lt;— here, indented under the container
+        requests:
+          cpu: "250m"
+          memory: "256Mi"
+        limits:
+          cpu: "500m"
+          memory: "512Mi"
+    - name: sidecar                 # second container = its own resources block
+      image: busybox
+      resources:
+        requests:
+          cpu: "50m"
+          memory: "64Mi"</code></pre>
+
+  <p>Inside a Deployment, it's nested deeper: <code>spec.template.spec.containers[].resources</code>.</p>
+
+  <h2>Units — Don't Mix Them Up</h2>
+  <table>
+    <tr><th>Resource</th><th>Valid</th><th>Means</th></tr>
+    <tr><td>CPU</td><td><code>1</code>, <code>0.5</code>, <code>500m</code></td><td>1 vCPU, half a vCPU, 500 millicores (= 0.5)</td></tr>
+    <tr><td>Memory (binary)</td><td><code>128Mi</code>, <code>1Gi</code>, <code>2Ti</code></td><td>Powers of 1024. <b>Use these.</b></td></tr>
+    <tr><td>Memory (decimal)</td><td><code>128M</code>, <code>1G</code></td><td>Powers of 1000. Slightly less than <code>Mi</code>/<code>Gi</code>.</td></tr>
+  </table>
+
+  <h2>Common Syntax Mistakes</h2>
+
+  <div class="mistake">
+    <b>✗ Mistake 1 —</b> Writing memory as <code>500m</code> thinking it's "500 mega".
+    <br>That's <em>500 milli-bytes</em> ≈ 0.5 bytes. Container will fail to start.
+    <br><b>✓ Use:</b> <code>500Mi</code> or <code>500M</code>.
+  </div>
+
+  <div class="mistake">
+    <b>✗ Mistake 2 —</b> Putting <code>resources:</code> at the pod level.
+<pre><code># WRONG
+spec:
+  resources:          # ← invalid
+    limits: ...
+  containers:
+    - name: app</code></pre>
+    <b>✓ Always under each container.</b>
+  </div>
+
+  <div class="mistake">
+    <b>✗ Mistake 3 —</b> Setting limit lower than request.
+    <br>API server rejects it: <code>limits.cpu &lt; requests.cpu</code>. Same for memory.
+  </div>
+
+  <div class="mistake">
+    <b>✗ Mistake 4 —</b> Quoting numbers wrong. Both <code>cpu: 500m</code> and <code>cpu: "500m"</code> work, but <code>cpu: 0.5</code> (no quotes) is fine while <code>memory: 256Mi</code> often needs quotes — YAML can mis-parse the suffix. <b>When in doubt, quote everything.</b>
+  </div>
+
+  <div class="tip">
+    <b>✓ Tip —</b> Use <code>kubectl run</code> to scaffold quickly:
+<pre><code>kubectl run nginx --image=nginx --dry-run=client -o yaml \
+  --requests='cpu=200m,memory=256Mi' \
+  --limits='cpu=500m,memory=512Mi'</code></pre>
+    Then edit the YAML. Faster than typing the resources block from memory.
+  </div>
+
+  <h2>QoS Classes — Decided Automatically</h2>
+  <p>You don't pick the QoS class; Kubernetes derives it from your requests/limits. It controls the eviction order under node pressure.</p>
+
+  <table>
+    <tr><th>Class</th><th>Condition</th><th>Eviction Order</th></tr>
+    <tr><td><span class="pill green">Guaranteed</span></td><td>Every container has request = limit for both CPU and memory</td><td>Last</td></tr>
+    <tr><td><span class="pill yellow">Burstable</span></td><td>At least one request set, but not Guaranteed</td><td>Middle</td></tr>
+    <tr><td><span class="pill red">BestEffort</span></td><td>No requests or limits anywhere</td><td>First</td></tr>
+  </table>
+
+  <h2>Decision Cheat Sheet</h2>
+  <ul>
+    <li><b>Latency-sensitive / databases:</b> request = limit (Guaranteed).</li>
+    <li><b>Bursty web app:</b> request &lt; limit (Burstable). Set memory request close to typical usage; CPU request lower.</li>
+    <li><b>Batch / CI runners:</b> request only on CPU is fine; <em>always</em> set a memory limit to prevent runaway jobs.</li>
+    <li><b>Never in prod:</b> nothing set anywhere.</li>
+    <li><b>Memory limit:</b> almost always set. The cost of OOMKill is usually less than the cost of taking down a node.</li>
+    <li><b>CPU limit:</b> controversial — many SREs <em>omit</em> CPU limits to avoid throttling latency. Set a CPU <em>request</em> always though.</li>
+  </ul>
+
+  <h2>Inspecting What's Set</h2>
+<pre><code># See the spec's resources block
+kubectl get pod &lt;name&gt; -o jsonpath='{.spec.containers[*].resources}'
+
+# Pretty per container
+kubectl describe pod &lt;name&gt; | grep -A4 -E 'Limits|Requests'
+
+# QoS class (derived)
+kubectl get pod &lt;name&gt; -o jsonpath='{.status.qosClass}'
+
+# Live usage (needs metrics-server)
+kubectl top pod &lt;name&gt; --containers</code></pre>
+
+  <h2>Imperative Quick Commands for CKA Exam</h2>
+
+<pre><code># Pod with requests and limits
+kubectl run nginx --image=nginx \
+  --requests='cpu=100m,memory=128Mi' \
+  --limits='cpu=500m,memory=256Mi'
+
+# Generate YAML for a Deployment, then add resources under containers
+kubectl create deployment nginx --image=nginx --dry-run=client -o yaml &gt; deploy-resources.yaml
+vi deploy-resources.yaml
+kubectl apply -f deploy-resources.yaml
+
+# Verify resources and QoS class
+kubectl describe pod &lt;pod-name&gt; | grep -A4 -E 'Limits|Requests'
+kubectl get pod &lt;pod-name&gt; -o jsonpath='{.status.qosClass}{"\n"}'</code></pre>
+
+  <div class="key-fact">
+    <strong>Final rule of thumb:</strong> always set a <em>memory limit</em>, always set a <em>CPU request</em>, and only set both equal when you truly need predictable performance.
+  </div>
+
+</div>
+</body>
+</html>

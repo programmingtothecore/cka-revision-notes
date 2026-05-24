@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CKA Revision — Selectors, Affinity &amp; Tolerations: The Story</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface-2: #1c2128;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text-dim: #8b949e;
+    --accent: #58a6ff;
+    --accent-warm: #f0883e;
+    --green: #3fb950;
+    --red: #f85149;
+    --yellow: #e3b341;
+    --purple: #bc8cff;
+    --code-bg: #010409;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    line-height: 1.7;
+    padding: 2rem 1.5rem 5rem;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(circle at 15% 10%, rgba(88, 166, 255, 0.08), transparent 40%),
+      radial-gradient(circle at 85% 80%, rgba(240, 136, 62, 0.06), transparent 40%);
+  }
+
+  .container { max-width: 860px; margin: 0 auto; }
+
+  .back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--text-dim);
+    text-decoration: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    margin-bottom: 1.5rem;
+    transition: color 0.15s;
+  }
+  .back:hover { color: var(--accent); }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1.5rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 0.75rem;
+  }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 800;
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+  h1 .accent { color: var(--accent-warm); font-style: italic; }
+
+  .subtitle {
+    color: var(--text-dim);
+    margin-top: 0.75rem;
+    font-size: 1.05rem;
+  }
+
+  h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.6rem;
+    font-weight: 600;
+    margin-top: 3rem;
+    margin-bottom: 1rem;
+    letter-spacing: -0.01em;
+  }
+  h2::before {
+    content: "§ ";
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9em;
+  }
+
+  h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-top: 1.75rem;
+    margin-bottom: 0.6rem;
+    color: var(--text);
+  }
+
+  p { margin-bottom: 1rem; }
+  ul, ol { margin: 0.5rem 0 1.25rem 1.4rem; }
+  li { margin-bottom: 0.4rem; }
+
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--code-bg);
+    color: var(--accent-warm);
+    padding: 0.15em 0.4em;
+    border-radius: 4px;
+    font-size: 0.88em;
+    border: 1px solid var(--border);
+  }
+
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    overflow-x: auto;
+    margin: 1rem 0 1.5rem;
+  }
+  pre code {
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--text);
+    font-size: 0.85rem;
+    line-height: 1.6;
+  }
+
+  .cast {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.25rem 1.5rem;
+    margin: 1.5rem 0;
+  }
+  .cast h3 { margin-top: 0; color: var(--accent); }
+  .cast ul { list-style: none; margin-left: 0; }
+  .cast li { padding: 0.45rem 0; border-bottom: 1px dashed var(--border); }
+  .cast li:last-child { border-bottom: none; }
+  .cast b { color: var(--accent-warm); font-family: 'JetBrains Mono', monospace; font-size: 0.92em; }
+
+  .scenario {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem 1.5rem;
+    margin: 1.25rem 0;
+    border-left: 4px solid var(--scenario-color, var(--accent));
+  }
+  .scenario .label {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--scenario-color, var(--accent));
+    background: rgba(88, 166, 255, 0.08);
+    padding: 0.2rem 0.55rem;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+  }
+  .scenario h3 { margin-top: 0; }
+  .scenario blockquote {
+    border-left: 2px solid var(--text-dim);
+    padding: 0.25rem 0 0.25rem 1rem;
+    margin: 0.75rem 0;
+    color: var(--text-dim);
+    font-style: italic;
+  }
+
+  .scenario.good { --scenario-color: var(--green); }
+  .scenario.warn { --scenario-color: var(--yellow); }
+  .scenario.bad  { --scenario-color: var(--red); }
+  .scenario.info { --scenario-color: var(--accent); }
+  .scenario.story { --scenario-color: var(--purple); }
+
+  .key-fact {
+    background: linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent-warm);
+    padding: 1.1rem 1.5rem;
+    border-radius: 6px;
+    margin: 1.5rem 0;
+  }
+  .key-fact strong {
+    color: var(--accent-warm);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0 1.5rem;
+    background: var(--surface);
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    font-size: 0.92rem;
+  }
+  th, td {
+    text-align: left;
+    padding: 0.7rem 0.9rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  th {
+    background: var(--surface-2);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-dim);
+  }
+  tr:last-child td { border-bottom: none; }
+
+  .mistake {
+    background: rgba(248, 81, 73, 0.06);
+    border: 1px solid rgba(248, 81, 73, 0.25);
+    border-left: 4px solid var(--red);
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    margin: 1rem 0;
+  }
+  .mistake b { color: var(--red); font-family: 'JetBrains Mono', monospace; }
+
+  .mantra {
+    text-align: center;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 1.25rem;
+    margin: 2.5rem 0 1rem;
+    padding: 1.5rem;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    color: var(--text-dim);
+  }
+  .mantra strong {
+    display: block;
+    color: var(--accent-warm);
+    font-style: normal;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 0.5rem;
+  }
+
+  footer {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    font-family: 'JetBrains Mono', monospace;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back" href="index.html">← back to hub</a>
+
+  <header>
+    <div class="eyebrow">CKA · Scheduling</div>
+    <h1>The Kubernetes Scheduling <span class="accent">Story</span></h1>
+    <p class="subtitle">Selectors, Affinity &amp; Tolerations made memorable — a job-fair in three acts.</p>
+  </header>
+
+  <h2>The Cast</h2>
+  <div class="cast">
+    <h3>Imagine a job fair in a city</h3>
+    <ul>
+      <li><b>Companies</b> — Controllers (Deployment, Service, NetworkPolicy)</li>
+      <li><b>Workers</b> — Pods</li>
+      <li><b>Houses</b> — Nodes</li>
+    </ul>
+  </div>
+
+  <h2>Act 1 — Companies hire workers (Selectors)</h2>
+  <div class="scenario story">
+    <span class="label">act 1 · selectors</span>
+    <p>Companies post job ads. Workers wear T-shirts with labels like <code>app=red</code>.</p>
+
+    <h3>Simple ad — <code>matchLabels</code></h3>
+    <blockquote>"Hiring anyone wearing <code>app=red</code>."</blockquote>
+
+    <h3>Picky ad — <code>matchExpressions</code></h3>
+    <blockquote>"Hiring anyone whose shirt is <b>In</b> [red, blue]."</blockquote>
+
+    <p>Set-based operators: <code>In</code>, <code>NotIn</code>, <code>Exists</code>, <code>DoesNotExist</code>.</p>
+    <p><b>Service is the lazy company</b> — it skips the <code>matchLabels</code> wrapper and writes <code>app: red</code> directly. Flat.</p>
+  </div>
+
+  <h2>Act 2 — Workers pick houses (Affinity)</h2>
+  <div class="scenario info">
+    <span class="label">act 2 · affinity</span>
+    <p>Hired workers need somewhere to live. Houses have labels too: <code>color=blue</code>, <code>disktype=ssd</code>.</p>
+
+    <h3>Lazy worker — <code>nodeSelector</code></h3>
+    <blockquote>"I'll live in any house labeled <code>disktype=ssd</code>."</blockquote>
+    <p>Flat <code>key: value</code> map. Done.</p>
+
+    <h3>Picky worker — <code>nodeAffinity</code></h3>
+    <blockquote>"I require color <b>In</b> [blue] <em>and</em> kernel-version <b>Gt</b> 5."</blockquote>
+    <p>Affinity is the <b>richest</b> language — it gets the bonus operators <code>Gt</code> and <code>Lt</code> on top of the four set operators.</p>
+  </div>
+
+  <h2>Act 3 — Some houses are haunted (Taints &amp; Tolerations)</h2>
+  <div class="scenario warn">
+    <span class="label">act 3 · taints &amp; tolerations</span>
+    <p>A few houses are <b>tainted</b> — haunted by ghosts. The owner shouts:</p>
+    <blockquote>"<code>color=blue:NoSchedule</code> — stay away unless you can handle me!"</blockquote>
+
+    <p>A worker who isn't scared writes a <b>toleration</b>:</p>
+    <blockquote>"I tolerate color <b>Equal</b> blue, effect NoSchedule."</blockquote>
+
+    <p>Tolerations are the <b>weird cousin</b>:</p>
+    <ul>
+      <li>Only two operators: <code>Equal</code>, <code>Exists</code></li>
+      <li>Singular <code>value</code> (not <code>values</code>!)</li>
+      <li>Don't <em>attract</em> the pod to the node — just <em>allow</em> it</li>
+    </ul>
+    <p>A toleration is a <b>permission slip</b>, not a GPS.</p>
+  </div>
+
+  <div class="key-fact">
+    <strong>Three-sentence summary</strong>
+    <ol style="margin-top: 0.6rem;">
+      <li><b>Selectors</b> = companies hiring workers by shirt label</li>
+      <li><b>Affinity</b> = workers choosing houses by house label</li>
+      <li><b>Tolerations</b> = workers willing to live in haunted houses</li>
+    </ol>
+  </div>
+
+  <h2>The One Table That Matters</h2>
+  <table>
+    <tr>
+      <th></th>
+      <th>Selectors</th>
+      <th>nodeAffinity</th>
+      <th>Tolerations</th>
+    </tr>
+    <tr>
+      <td><b>Operators</b></td>
+      <td>In, NotIn, Exists, DoesNotExist</td>
+      <td>+ Gt, Lt</td>
+      <td>Equal, Exists</td>
+    </tr>
+    <tr>
+      <td><b>Values field</b></td>
+      <td><code>values</code> (list)</td>
+      <td><code>values</code> (list)</td>
+      <td><code>value</code> (singular)</td>
+    </tr>
+    <tr>
+      <td><b>Lives on</b></td>
+      <td>Controller</td>
+      <td>Pod</td>
+      <td>Pod</td>
+    </tr>
+  </table>
+
+  <h2>The Three Mistakes That Will Bite You</h2>
+
+  <div class="mistake">
+    <b>✗ Mistake 1 —</b> Using <code>Equal</code> in affinity.
+    <br>It's <code>In</code> (with a values list). Affinity has no <code>Equal</code>.
+  </div>
+
+  <div class="mistake">
+    <b>✗ Mistake 2 —</b> Using <code>value</code> in affinity.
+    <br>It's <code>values</code> (a list) for affinity/selectors. Only tolerations use singular <code>value</code>.
+  </div>
+
+  <div class="mistake">
+    <b>✗ Mistake 3 —</b> Putting affinity at <code>spec.affinity</code> in a Deployment.
+    <br>It's <code>spec.template.spec.affinity</code> — affinity is a pod concern, not a deployment concern.
+  </div>
+
+  <h2>Quick YAML Reference</h2>
+
+  <h3>Service selector — flat</h3>
+<pre><code>kind: Service
+spec:
+  selector:
+    app: red</code></pre>
+
+  <h3>Deployment matchLabels</h3>
+<pre><code>spec:
+  selector:
+    matchLabels:
+      app: red
+  template:
+    metadata:
+      labels:
+        app: red    # MUST match selector</code></pre>
+
+  <h3>matchExpressions</h3>
+<pre><code>selector:
+  matchExpressions:
+    - key: app
+      operator: In
+      values:
+        - red
+        - blue</code></pre>
+
+  <h3>nodeSelector (simple)</h3>
+<pre><code>spec:                # pod spec
+  nodeSelector:
+    disktype: ssd</code></pre>
+
+  <h3>nodeAffinity (rich)</h3>
+<pre><code>spec:                # pod spec
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: color
+                operator: In
+                values:
+                  - blue</code></pre>
+
+  <h3>Tolerations</h3>
+<pre><code>spec:                # pod spec
+  tolerations:
+    - key: color
+      operator: Equal
+      value: blue          # singular!
+      effect: NoSchedule</code></pre>
+
+  <h2>Required vs Preferred (Affinity only)</h2>
+  <table>
+    <tr><th>Variant</th><th>Hard or Soft?</th><th>Has <code>weight</code>?</th></tr>
+    <tr><td>requiredDuringSchedulingIgnoredDuringExecution</td><td>Hard rule — won't schedule if no match</td><td>No</td></tr>
+    <tr><td>preferredDuringSchedulingIgnoredDuringExecution</td><td>Soft preference — best-effort</td><td>Yes (1–100)</td></tr>
+  </table>
+
+  <h2>Toleration Effects</h2>
+  <table>
+    <tr><th>Effect</th><th>Meaning</th></tr>
+    <tr><td><code>NoSchedule</code></td><td>New pods won't schedule unless they tolerate</td></tr>
+    <tr><td><code>PreferNoSchedule</code></td><td>Soft version — scheduler tries to avoid</td></tr>
+    <tr><td><code>NoExecute</code></td><td>Existing pods evicted unless they tolerate (use <code>tolerationSeconds</code> for grace period)</td></tr>
+  </table>
+
+  <h2>Quick-Recall Drill</h2>
+  <table>
+    <tr><th>Question</th><th>Answer</th></tr>
+    <tr><td>Operator for toleration matching <code>color=blue</code></td><td><code>Equal</code></td></tr>
+    <tr><td>Operator for nodeAffinity matching <code>color=blue</code></td><td><code>In</code> (with values list)</td></tr>
+    <tr><td>Field name in toleration: <code>value</code> or <code>values</code>?</td><td><code>value</code> (singular)</td></tr>
+    <tr><td>Field name in matchExpression: <code>value</code> or <code>values</code>?</td><td><code>values</code> (list)</td></tr>
+    <tr><td>Where does affinity live in a Deployment YAML?</td><td><code>spec.template.spec.affinity</code></td></tr>
+    <tr><td>Where does selector live in a Deployment YAML?</td><td><code>spec.selector</code> (NOT in template)</td></tr>
+    <tr><td>Service selector syntax — flat or <code>matchLabels</code>?</td><td>Flat</td></tr>
+    <tr><td>Does a Pod have a <code>selector</code> field?</td><td>No — only labels</td></tr>
+    <tr><td>Two valid operators for tolerations?</td><td><code>Equal</code>, <code>Exists</code></td></tr>
+    <tr><td>Two operators unique to nodeAffinity?</td><td><code>Gt</code>, <code>Lt</code></td></tr>
+  </table>
+
+  <h2>Imperative Quick Commands for CKA Exam</h2>
+
+<pre><code># Pod with nodeSelector
+kubectl run nginx --image=nginx \
+  --overrides='{"spec":{"nodeSelector":{"disktype":"ssd"}}}'
+
+# Pod with toleration
+kubectl run nginx --image=nginx \
+  --overrides='{"spec":{"tolerations":[{"key":"color","operator":"Equal","value":"blue","effect":"NoSchedule"}]}}'
+
+# Generate YAML for affinity, then edit
+kubectl run nginx --image=nginx --dry-run=client -o yaml &gt; pod-affinity.yaml
+vi pod-affinity.yaml
+kubectl apply -f pod-affinity.yaml
+
+# Confirm placement and events
+kubectl get pod nginx -o wide
+kubectl describe pod nginx</code></pre>
+
+  <div class="mantra">
+    <strong>The Mantra</strong>
+    "Companies select shirts. Workers pick houses. Ghosts need permission slips."
+  </div>
+
+  <footer>cka_notes / scheduling / story.html</footer>
+
+</div>
+</body>
+</html>

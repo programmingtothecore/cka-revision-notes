@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CKA Revision — Imperative Commands Cheat Sheet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface-2: #1c2128;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text-dim: #8b949e;
+    --accent: #58a6ff;
+    --accent-warm: #f0883e;
+    --green: #3fb950;
+    --red: #f85149;
+    --yellow: #e3b341;
+    --purple: #bc8cff;
+    --code-bg: #010409;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    line-height: 1.7;
+    padding: 2rem 1.5rem 5rem;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(circle at 15% 10%, rgba(88, 166, 255, 0.08), transparent 40%),
+      radial-gradient(circle at 85% 80%, rgba(240, 136, 62, 0.06), transparent 40%);
+  }
+
+  .container { max-width: 1080px; margin: 0 auto; }
+
+  .back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--text-dim);
+    text-decoration: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    margin-bottom: 1.5rem;
+    transition: color 0.15s;
+  }
+  .back:hover { color: var(--accent); }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1.5rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 0.75rem;
+  }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 800;
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+  h1 .accent { color: var(--accent-warm); font-style: italic; }
+
+  .subtitle {
+    color: var(--text-dim);
+    margin-top: 0.75rem;
+    font-size: 1.05rem;
+    max-width: 760px;
+  }
+
+  h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.45rem;
+    font-weight: 600;
+    margin-top: 2.25rem;
+    margin-bottom: 1rem;
+    letter-spacing: -0.01em;
+  }
+  h2::before {
+    content: "§ ";
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9em;
+  }
+
+  p { margin-bottom: 1rem; }
+
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--code-bg);
+    color: var(--accent-warm);
+    padding: 0.15em 0.4em;
+    border-radius: 4px;
+    font-size: 0.88em;
+    border: 1px solid var(--border);
+  }
+
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    overflow-x: visible;
+    margin: 0.75rem 0 1rem;
+    white-space: pre-wrap;
+  }
+  pre code {
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--text);
+    font-size: 0.82rem;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  td code {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1rem;
+  }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.1rem;
+  }
+
+  .panel h3 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.6rem;
+  }
+
+  .expected {
+    border-left-color: var(--green);
+    margin-top: 0.5rem;
+  }
+  .expected code { color: var(--text-dim); }
+
+  .note {
+    color: var(--text-dim);
+    font-size: 0.88rem;
+    margin: -0.25rem 0 0.75rem;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0 1.5rem;
+    background: var(--surface);
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    font-size: 0.9rem;
+  }
+  th, td {
+    text-align: left;
+    padding: 0.65rem 0.8rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  th {
+    background: var(--surface-2);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.76rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-dim);
+  }
+  tr:last-child td { border-bottom: none; }
+
+  .key-fact {
+    background: linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent-warm);
+    padding: 1.1rem 1.5rem;
+    border-radius: 6px;
+    margin: 1.5rem 0;
+  }
+  .key-fact strong {
+    color: var(--accent-warm);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  footer {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    font-family: 'JetBrains Mono', monospace;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back" href="index.html">← back to hub</a>
+
+  <header>
+    <div class="eyebrow">CKA · Exam Speed</div>
+    <h1>Imperative Commands — <span class="accent">One-Glance Cheat Sheet</span></h1>
+    <p class="subtitle">Fast commands, dry-run patterns, and small output examples for the CKA. Use imperative commands to generate YAML, then edit only what the command cannot express.</p>
+  </header>
+
+  <div class="key-fact">
+    <strong>The pattern</strong>
+    <p style="margin: 0.6rem 0 0; color: var(--text);">
+      Most CKA speed comes from <code>--dry-run=client -o yaml &gt; file.yaml</code>, then editing the few fields that kubectl cannot set with flags.
+    </p>
+  </div>
+
+  <h2>Imperative Quick Commands for CKA Exam</h2>
+  <p>This whole page is the quick-command view. Start with the direct command; if a flag does not exist, use <code>--overrides</code> for small pod-spec changes or generate YAML with <code>--dry-run=client -o yaml</code>.</p>
+
+  <h2>Core Creation Commands</h2>
+  <div class="grid">
+    <div class="panel">
+      <h3>Pod</h3>
+<pre><code>kubectl run nginx \
+  --image=nginx</code></pre>
+<pre class="expected"><code>pod/nginx created</code></pre>
+<pre><code>kubectl run nginx \
+  --image=nginx \
+  --dry-run=client -o yaml &gt; pod.yaml</code></pre>
+<pre class="expected"><code># no terminal output
+# pod.yaml file is created</code></pre>
+    </div>
+    <div class="panel">
+      <h3>Export Existing Pod</h3>
+      <p class="note">Use this when the pod already exists. No <code>--dry-run</code> needed.</p>
+<pre><code>kubectl get pod critical-app \
+  -o yaml &gt; crtapp.yaml</code></pre>
+<pre class="expected"><code># no terminal output
+# crtapp.yaml file is created</code></pre>
+    </div>
+    <div class="panel">
+      <h3>Deployment</h3>
+<pre><code>kubectl create deployment nginx \
+  --image=nginx \
+  --replicas=3</code></pre>
+<pre class="expected"><code>deployment.apps/nginx created</code></pre>
+<pre><code>kubectl create deployment nginx \
+  --image=nginx \
+  --dry-run=client -o yaml &gt; deploy.yaml</code></pre>
+<pre class="expected"><code># no terminal output
+# deploy.yaml file is created</code></pre>
+    </div>
+    <div class="panel">
+      <h3>Service</h3>
+<pre><code>kubectl expose pod nginx \
+  --port=80 \
+  --target-port=80 \
+  --name=nginx-svc</code></pre>
+<pre class="expected"><code>service/nginx-svc exposed</code></pre>
+<pre><code>kubectl create service clusterip nginx \
+  --tcp=80:80</code></pre>
+<pre class="expected"><code>service/nginx created</code></pre>
+    </div>
+    <div class="panel">
+      <h3>Namespace</h3>
+<pre><code>kubectl create ns dev
+kubectl config set-context --current --namespace=dev</code></pre>
+<pre class="expected"><code>namespace/dev created
+Context "..." modified.</code></pre>
+    </div>
+  </div>
+
+  <h2>Scheduling &amp; Placement</h2>
+  <table>
+    <tr><th>Need</th><th>Command</th><th>Expected / Check</th></tr>
+    <tr>
+      <td>Node selector pod</td>
+      <td><pre><code>kubectl run nginx \
+  --image=nginx \
+  --overrides='{"spec":{"nodeSelector":{"disk":"ssd"}}}'</code></pre></td>
+      <td><pre class="expected"><code>pod/nginx created
+kubectl get pod nginx -o wide</code></pre></td>
+    </tr>
+    <tr>
+      <td>Toleration pod</td>
+      <td><pre><code>kubectl run nginx \
+  --image=nginx \
+  --overrides='{"spec":{"tolerations":[{"key":"dedicated","operator":"Equal","value":"gpu","effect":"NoSchedule"}]}}'</code></pre></td>
+      <td><pre class="expected"><code>pod/nginx created
+kubectl describe pod nginx</code></pre></td>
+    </tr>
+    <tr>
+      <td>PriorityClass</td>
+      <td><pre><code>kubectl create priorityclass high \
+  --value=100000</code></pre></td>
+      <td><pre class="expected"><code>priorityclass.scheduling.k8s.io/high created
+kubectl get pc</code></pre></td>
+    </tr>
+    <tr>
+      <td>Pod with PriorityClass</td>
+      <td><pre><code>kubectl run nginx \
+  --image=nginx \
+  --overrides='{"spec":{"priorityClassName":"high"}}'</code></pre></td>
+      <td><pre class="expected"><code>pod/nginx created
+kubectl get pod nginx \
+  -o jsonpath='{.spec.priority}'</code></pre></td>
+    </tr>
+    <tr>
+      <td>DaemonSet</td>
+      <td><pre><code>kubectl create deployment agent \
+  --image=nginx \
+  --dry-run=client -o yaml &gt; ds.yaml</code></pre>
+      Then change <code>kind</code> to <code>DaemonSet</code> and remove Deployment-only fields.</td>
+      <td><pre class="expected"><code># no terminal output
+# ds.yaml file is created
+kubectl get ds,pod -o wide</code></pre></td>
+    </tr>
+  </table>
+
+  <h2>Resources</h2>
+  <div class="grid">
+    <div class="panel">
+      <h3>Requests / Limits</h3>
+<pre><code>kubectl run nginx --image=nginx \
+  --requests='cpu=100m,memory=128Mi' \
+  --limits='cpu=500m,memory=256Mi'</code></pre>
+<pre class="expected"><code>pod/nginx created</code></pre>
+    </div>
+    <div class="panel">
+      <h3>Edit Generated YAML</h3>
+<pre><code>kubectl run nginx --image=nginx --dry-run=client -o yaml &gt; pod.yaml
+vi pod.yaml
+kubectl apply -f pod.yaml</code></pre>
+<pre class="expected"><code># file generated, edited, then:
+pod/nginx created</code></pre>
+    </div>
+  </div>
+
+  <h2>Config, Secrets, and Volumes</h2>
+  <table>
+    <tr><th>Need</th><th>Command</th><th>Expected</th></tr>
+    <tr>
+      <td>ConfigMap literal</td>
+      <td><pre><code>kubectl create cm app-cm \
+  --from-literal=MODE=prod</code></pre></td>
+      <td><pre class="expected"><code>configmap/app-cm created</code></pre></td>
+    </tr>
+    <tr>
+      <td>ConfigMap file</td>
+      <td><pre><code>kubectl create cm app-cm \
+  --from-file=app.conf</code></pre></td>
+      <td><pre class="expected"><code>configmap/app-cm created</code></pre></td>
+    </tr>
+    <tr>
+      <td>Secret literal</td>
+      <td><pre><code>kubectl create secret generic db-secret \
+  --from-literal=password=pass123</code></pre></td>
+      <td><pre class="expected"><code>secret/db-secret created</code></pre></td>
+    </tr>
+    <tr>
+      <td>TLS secret</td>
+      <td><pre><code>kubectl create secret tls tls-secret \
+  --cert=tls.crt \
+  --key=tls.key</code></pre></td>
+      <td><pre class="expected"><code>secret/tls-secret created</code></pre></td>
+    </tr>
+  </table>
+
+  <h2>Jobs &amp; CronJobs</h2>
+  <div class="grid">
+    <div class="panel">
+      <h3>Job</h3>
+<pre><code>kubectl create job pi --image=perl -- perl -Mbignum=bpi -wle 'print bpi(2000)'
+kubectl get jobs,pods</code></pre>
+<pre class="expected"><code>job.batch/pi created
+NAME   COMPLETIONS   DURATION   AGE</code></pre>
+    </div>
+    <div class="panel">
+      <h3>CronJob</h3>
+<pre><code>kubectl create cronjob hello \
+  --image=busybox \
+  --schedule="*/1 * * * *" \
+  -- date</code></pre>
+<pre class="expected"><code>cronjob.batch/hello created</code></pre>
+    </div>
+  </div>
+
+  <h2>Troubleshooting Output Patterns</h2>
+<pre><code># Wide placement view
+kubectl get pods -o wide
+
+# Events and scheduling errors
+kubectl describe pod nginx
+
+# Logs
+kubectl logs nginx
+kubectl logs deploy/nginx
+
+# Rollout
+kubectl rollout status deploy/nginx
+kubectl rollout history deploy/nginx
+kubectl rollout undo deploy/nginx
+
+# Explain fields
+kubectl explain pod.spec
+kubectl explain deployment.spec.template.spec.affinity
+kubectl explain priorityclass</code></pre>
+
+  <h2>Expected Output Glance</h2>
+  <table>
+    <tr><th>Command</th><th>Typical output shape</th></tr>
+    <tr><td><code>kubectl get pod nginx</code></td><td><code>NAME READY STATUS RESTARTS AGE</code></td></tr>
+    <tr><td><code>kubectl get deploy</code></td><td><code>NAME READY UP-TO-DATE AVAILABLE AGE</code></td></tr>
+    <tr><td><code>kubectl get rs</code></td><td><code>NAME DESIRED CURRENT READY AGE</code></td></tr>
+    <tr><td><code>kubectl get ds</code></td><td><code>NAME DESIRED CURRENT READY UP-TO-DATE AVAILABLE NODE SELECTOR AGE</code></td></tr>
+    <tr><td><code>kubectl get pc</code></td><td><code>NAME VALUE GLOBAL-DEFAULT AGE</code></td></tr>
+    <tr><td><code>kubectl get svc</code></td><td><code>NAME TYPE CLUSTER-IP EXTERNAL-IP PORT(S) AGE</code></td></tr>
+  </table>
+
+  <footer>cka_notes / exam_speed / imperative_commands_cheatsheet.html</footer>
+
+</div>
+</body>
+</html>

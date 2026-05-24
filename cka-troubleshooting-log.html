@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CKA Revision — Troubleshooting Log</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface-2: #1c2128;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text-dim: #8b949e;
+    --accent: #58a6ff;
+    --accent-warm: #f0883e;
+    --green: #3fb950;
+    --red: #f85149;
+    --yellow: #e3b341;
+    --purple: #bc8cff;
+    --code-bg: #010409;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    line-height: 1.7;
+    padding: 2rem 1.5rem 5rem;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(circle at 15% 10%, rgba(88, 166, 255, 0.08), transparent 40%),
+      radial-gradient(circle at 85% 80%, rgba(240, 136, 62, 0.06), transparent 40%);
+  }
+
+  .container { max-width: 860px; margin: 0 auto; }
+
+  .back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--text-dim);
+    text-decoration: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    margin-bottom: 1.5rem;
+    transition: color 0.15s;
+  }
+  .back:hover { color: var(--accent); }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1.5rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 0.75rem;
+  }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 800;
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+  h1 .accent { color: var(--accent-warm); font-style: italic; }
+
+  .subtitle {
+    color: var(--text-dim);
+    margin-top: 0.75rem;
+    font-size: 1.05rem;
+  }
+
+  h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.55rem;
+    font-weight: 600;
+    margin-top: 3rem;
+    margin-bottom: 1rem;
+    letter-spacing: -0.01em;
+  }
+  h2::before {
+    content: "§ ";
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9em;
+  }
+
+  h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  p { margin-bottom: 1rem; }
+  ul, ol { margin: 0.5rem 0 1.25rem 1.4rem; }
+  li { margin-bottom: 0.4rem; }
+
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--code-bg);
+    color: var(--accent-warm);
+    padding: 0.15em 0.4em;
+    border-radius: 4px;
+    font-size: 0.88em;
+    border: 1px solid var(--border);
+  }
+
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    overflow-x: visible;
+    white-space: pre-wrap;
+    margin: 1rem 0 1.5rem;
+  }
+  pre code {
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--text);
+    font-size: 0.85rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+  }
+
+  .key-fact {
+    background: linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent-warm);
+    padding: 1.1rem 1.5rem;
+    border-radius: 6px;
+    margin: 1.5rem 0;
+  }
+  .key-fact strong {
+    color: var(--accent-warm);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .scenario {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem 1.5rem;
+    margin: 1.25rem 0;
+    border-left: 4px solid var(--scenario-color, var(--accent));
+  }
+  .scenario .label {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--scenario-color, var(--accent));
+    background: rgba(88, 166, 255, 0.08);
+    padding: 0.2rem 0.55rem;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+  }
+  .scenario.good { --scenario-color: var(--green); }
+  .scenario.warn { --scenario-color: var(--yellow); }
+  .scenario.bad  { --scenario-color: var(--red); }
+  .scenario.info { --scenario-color: var(--accent); }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0 1.5rem;
+    background: var(--surface);
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    font-size: 0.92rem;
+  }
+  th, td {
+    text-align: left;
+    padding: 0.7rem 0.9rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  th {
+    background: var(--surface-2);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-dim);
+  }
+  tr:last-child td { border-bottom: none; }
+
+  .mantra {
+    text-align: center;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 1.25rem;
+    margin: 2.5rem 0 1rem;
+    padding: 1.5rem;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    color: var(--text-dim);
+  }
+  .mantra strong {
+    display: block;
+    color: var(--accent-warm);
+    font-style: normal;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 0.5rem;
+  }
+
+  footer {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    font-family: 'JetBrains Mono', monospace;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back" href="index.html">← back to hub</a>
+
+  <header>
+    <div class="eyebrow">CKA · Troubleshooting</div>
+    <h1>Troubleshooting Log — <span class="accent">PriorityClass Pod YAML</span></h1>
+    <p class="subtitle">A super-brief recap of what went wrong, what questions came up, and the clean fix path.</p>
+  </header>
+
+  <div class="key-fact">
+    <strong>Topic</strong>
+    <p style="margin: 0.6rem 0 0; color: var(--text);">
+      Creating a critical Pod with <code>priorityClassName: high-priority</code>, CPU/memory requests, and clean YAML for CKA.
+    </p>
+  </div>
+
+  <h2>What We Did</h2>
+  <ol>
+    <li>Added a <b>PriorityClass</b> page explaining <code>priorityClassName</code>, preemption, and imperative commands.</li>
+    <li>Created an <b>Imperative Commands Cheat Sheet</b> page for CKA speed commands and expected output.</li>
+    <li>Fixed cheat sheet readability by wrapping long commands instead of forcing horizontal scroll.</li>
+    <li>Discussed how to clean exported Pod YAML before re-applying it.</li>
+    <li>Debugged why the edited YAML still failed.</li>
+    <li>Added a <b>Multiple Schedulers</b> page after hitting the <code>spec.scheduler</code> field-name error.</li>
+  </ol>
+
+  <h2>Questions Asked</h2>
+  <table>
+    <tr><th>Question</th><th>Short answer</th></tr>
+    <tr>
+      <td>Is there an imperative command to create a Pod with PriorityClass?</td>
+      <td>Yes, use <code>kubectl run ... --overrides='{"spec":{"priorityClassName":"high-priority"}}'</code>.</td>
+    </tr>
+    <tr>
+      <td>Why is exported YAML painful?</td>
+      <td><code>kubectl get pod -o yaml</code> includes server-generated fields that are noisy or unsafe to reapply.</td>
+    </tr>
+    <tr>
+      <td>How do I quit vim without saving?</td>
+      <td><code>Esc</code>, then <code>:q!</code>, then Enter.</td>
+    </tr>
+    <tr>
+      <td>How do I delete a whole block in vim?</td>
+      <td>Use <code>V</code> for visual line mode, select lines, then press <code>d</code>. Or use <code>5dd</code> for 5 lines.</td>
+    </tr>
+    <tr>
+      <td>How do I undo in vim?</td>
+      <td><code>Esc</code>, then <code>u</code>. Redo is <code>Ctrl+r</code>.</td>
+    </tr>
+    <tr>
+      <td>Do I only delete annotations?</td>
+      <td>No. For clean YAML, also remove generated metadata like <code>creationTimestamp</code>, <code>resourceVersion</code>, <code>uid</code>, and noisy runtime spec fields.</td>
+    </tr>
+    <tr>
+      <td>Why did my multiple-scheduler Pod fail with <code>unknown field "spec.scheduler"</code>?</td>
+      <td>The field is <code>spec.schedulerName</code>, not <code>spec.scheduler</code>.</td>
+    </tr>
+  </table>
+
+  <h2>The Actual YAML Bug</h2>
+  <div class="scenario bad">
+    <span class="label">typo</span>
+    <p>The file had this:</p>
+<pre><code>piVersion: v1</code></pre>
+    <p>It must be:</p>
+<pre><code>apiVersion: v1</code></pre>
+  </div>
+
+  <h2>Clean Final YAML</h2>
+<pre><code>apiVersion: v1
+kind: Pod
+metadata:
+  name: critical-app
+  namespace: default
+spec:
+  priorityClassName: high-priority
+  containers:
+  - name: critical-container
+    image: nginx
+    resources:
+      limits:
+        memory: 3Gi
+      requests:
+        cpu: "1"
+        memory: 3Gi</code></pre>
+
+  <h2>Apply Flow</h2>
+<pre><code># Recreate because most Pod spec fields are immutable
+kubectl delete pod critical-app --ignore-not-found
+
+# Apply clean YAML
+kubectl apply -f crtapp.yaml
+
+# Check status and scheduling events
+kubectl get pod critical-app -o wide
+kubectl describe pod critical-app</code></pre>
+
+  <h2>Multiple Scheduler Issue</h2>
+  <div class="scenario bad">
+    <span class="label">field name</span>
+    <p>The YAML used this invalid field:</p>
+<pre><code>spec:
+  scheduler: my-scheduler</code></pre>
+    <p>Kubernetes rejected it with:</p>
+<pre><code>strict decoding error: unknown field "spec.scheduler"</code></pre>
+    <p>The correct field is:</p>
+<pre><code>spec:
+  schedulerName: my-scheduler</code></pre>
+  </div>
+
+  <h3>Clean YAML</h3>
+<pre><code>apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+spec:
+  schedulerName: my-scheduler
+  containers:
+  - name: nginx
+    image: nginx</code></pre>
+
+  <h2>Imperative Quick Commands for CKA Exam</h2>
+<pre><code># Generate clean starter YAML
+kubectl run critical-app \
+  --image=nginx \
+  --dry-run=client -o yaml &gt; crtapp.yaml
+
+# Existing Pod export, if needed
+kubectl get pod critical-app \
+  -o yaml &gt; crtapp.yaml
+
+# Pod with PriorityClass in one command
+kubectl run critical-app \
+  --image=nginx \
+  --overrides='{"spec":{"priorityClassName":"high-priority"}}'
+
+# Pod using custom scheduler
+kubectl run nginx \
+  --image=nginx \
+  --overrides='{"spec":{"schedulerName":"my-scheduler"}}'</code></pre>
+
+  <div class="mantra">
+    <strong>The Mantra</strong>
+    "Generate clean YAML when possible. Exported YAML needs cleanup. Check apiVersion first."
+  </div>
+
+  <footer>cka_notes / troubleshooting / priorityclass_pod_yaml.html</footer>
+
+</div>
+</body>
+</html>

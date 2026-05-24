@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CKA Revision — Searchable Topic Index</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface-2: #1c2128;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text-dim: #8b949e;
+    --accent: #58a6ff;
+    --accent-warm: #f0883e;
+    --green: #3fb950;
+    --red: #f85149;
+    --yellow: #e3b341;
+    --purple: #bc8cff;
+    --code-bg: #010409;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    line-height: 1.6;
+    padding: 2rem 1.5rem 5rem;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(circle at 15% 10%, rgba(88, 166, 255, 0.08), transparent 40%),
+      radial-gradient(circle at 85% 80%, rgba(240, 136, 62, 0.06), transparent 40%);
+  }
+
+  .container { max-width: 1040px; margin: 0 auto; }
+
+  .back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--text-dim);
+    text-decoration: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    margin-bottom: 1.5rem;
+    transition: color 0.15s;
+  }
+  .back:hover { color: var(--accent); }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 0.75rem;
+  }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 800;
+    font-size: clamp(1.9rem, 4vw, 2.7rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+  h1 .accent { color: var(--accent-warm); font-style: italic; }
+
+  .subtitle {
+    color: var(--text-dim);
+    margin-top: 0.75rem;
+    font-size: 1.02rem;
+    max-width: 760px;
+  }
+
+  .search-wrap {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    padding: 1rem 0;
+    background: linear-gradient(180deg, var(--bg) 70%, rgba(13, 17, 23, 0));
+  }
+
+  .search-box {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.75rem 0.9rem;
+  }
+
+  .search-icon {
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+  }
+
+  input {
+    flex: 1;
+    min-width: 0;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font: inherit;
+  }
+  input::placeholder { color: var(--text-dim); }
+
+  .count {
+    color: var(--text-dim);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    white-space: nowrap;
+  }
+
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--text-dim);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin: 2rem 0 0.9rem;
+  }
+  .section-title::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .topic-list {
+    display: grid;
+    gap: 0.65rem;
+  }
+
+  .topic {
+    display: grid;
+    grid-template-columns: 2.5rem 1fr auto;
+    gap: 0.9rem;
+    align-items: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.85rem 1rem;
+    color: inherit;
+    text-decoration: none;
+    transition: border-color 0.15s, background 0.15s, transform 0.15s;
+  }
+  .topic:hover {
+    background: var(--surface-2);
+    border-color: var(--accent);
+    transform: translateY(-1px);
+  }
+
+  .num {
+    width: 2rem;
+    height: 2rem;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--topic-color, var(--accent));
+    border-radius: 50%;
+    color: var(--topic-color, var(--accent));
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+  }
+
+  .main h2 {
+    font-size: 1rem;
+    line-height: 1.35;
+    margin-bottom: 0.25rem;
+  }
+
+  .main p {
+    color: var(--text-dim);
+    font-size: 0.88rem;
+  }
+
+  .meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.35rem;
+  }
+
+  .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--topic-color, var(--accent));
+    background: rgba(88, 166, 255, 0.08);
+    border: 1px solid color-mix(in srgb, var(--topic-color, var(--accent)) 35%, transparent);
+    border-radius: 4px;
+    padding: 0.2rem 0.5rem;
+  }
+
+  .file {
+    color: var(--text-dim);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+  }
+
+  .empty {
+    display: none;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--yellow);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    color: var(--text-dim);
+    margin-top: 1rem;
+  }
+
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--code-bg);
+    color: var(--accent-warm);
+    padding: 0.12em 0.35em;
+    border-radius: 4px;
+    font-size: 0.88em;
+    border: 1px solid var(--border);
+  }
+
+  footer {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    font-family: 'JetBrains Mono', monospace;
+    text-align: center;
+  }
+
+  @media (max-width: 720px) {
+    .topic { grid-template-columns: 2.25rem 1fr; align-items: start; }
+    .meta { grid-column: 2; align-items: flex-start; }
+    .search-box { align-items: flex-start; }
+    .count { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back" href="index.html">← back to hub</a>
+
+  <header>
+    <div class="eyebrow">CKA · Searchable Index</div>
+    <h1>Topic Index — <span class="accent">Find Anything Fast</span></h1>
+    <p class="subtitle">A dense ordered index of all notes. Search by topic, command, file name, error type, or Kubernetes object.</p>
+  </header>
+
+  <div class="search-wrap">
+    <label class="search-box">
+      <span class="search-icon">/</span>
+      <input id="search" type="search" placeholder="Search: priority, static pod, vim, apiVersion, requests, DaemonSet..." autofocus>
+      <span class="count" id="count">12 topics</span>
+    </label>
+  </div>
+
+  <div id="index"></div>
+  <div class="empty" id="empty">No matching topics. Try a shorter word like <code>pod</code>, <code>priority</code>, <code>yaml</code>, or <code>vim</code>.</div>
+
+  <footer>cka_notes / searchable_topic_index.html</footer>
+
+</div>
+
+<script>
+const sections = [
+  {
+    title: 'Exam Speed',
+    color: '#e3b341',
+    topics: [
+      {
+        title: 'Imperative Commands — One-Glance Cheat Sheet',
+        href: 'cka-imperative-commands-cheatsheet.html',
+        tag: 'Commands',
+        desc: 'Fast kubectl commands, dry-run patterns, expected outputs, pod export, resources, jobs, services, PriorityClass.',
+        keywords: 'imperative commands dry-run output kubectl run create expose priorityclass overrides crtapp yaml'
+      },
+      {
+        title: 'Troubleshooting Log — PriorityClass Pod YAML',
+        href: 'cka-troubleshooting-log.html',
+        tag: 'Troubleshoot',
+        desc: 'PriorityClass pod YAML issue, vim fixes, exported YAML cleanup, piVersion typo, final apply flow.',
+        keywords: 'troubleshooting priorityclass critical-app vim undo delete block q! apiVersion piVersion exported yaml cleanup'
+      },
+      {
+        title: 'Test - Page',
+        href: 'cka-test-page.html',
+        tag: 'Troubleshoot',
+        desc: 'Test page for adding troubleshooting data, using ImagePullBackOff as the example flow.',
+        keywords: 'test page troubleshooting imagepullbackoff image pull backoff events describe badtag registry'
+      },
+      {
+        title: 'Revision Pipeline',
+        href: 'cka-revision-flow.html',
+        tag: 'Flow',
+        desc: 'Sequential path through the notes for a full revision pass.',
+        keywords: 'revision flow order pipeline sequence study path'
+      },
+      {
+        title: 'Add Custom Page — Generate a Matching Note',
+        href: 'cka-add-custom-page.html',
+        tag: 'Tool',
+        desc: 'Form-based page builder with preview, downloadable HTML, copied source, and hub card snippet.',
+        keywords: 'add custom page builder generator preview download html hub card snippet new note'
+      }
+    ]
+  },
+  {
+    title: 'Foundations',
+    color: '#3fb950',
+    topics: [
+      {
+        title: 'Pods & Controllers — The Basics Map',
+        href: 'cka-pod-controllers-basics.html',
+        tag: 'Fundamentals',
+        desc: 'Pod, ReplicationController, ReplicaSet, Deployment, DaemonSet, StatefulSet, Job, CronJob, Service.',
+        keywords: 'pod rc replicationcontroller replicaset deployment daemonset statefulset job cronjob service owner chain'
+      },
+      {
+        title: 'How to Guess the apiVersion',
+        href: 'cka-apiversion-guide.html',
+        tag: 'Fundamentals',
+        desc: 'apiVersion groups, core v1, apps/v1, batch/v1, kubectl explain, api-resources.',
+        keywords: 'apiversion api resources explain apps v1 batch networking rbac autoscaling'
+      },
+      {
+        title: 'Kubernetes Paths — Files You Must Know',
+        href: 'cka-kubernetes-paths.html',
+        tag: 'Paths',
+        desc: 'Static pod manifests, kubeconfigs, certs, kubelet config, etcd data, logs, systemd.',
+        keywords: 'paths manifests /etc/kubernetes admin.conf kubeconfig pki certs kubelet /var/lib/etcd logs systemctl journalctl'
+      },
+      {
+        title: 'Asymmetric Encryption, Signatures & Certificates',
+        href: 'cka-asymmetric-encryption-certificates.html',
+        tag: 'Security',
+        desc: 'Plain-English visual map of public/private keys, signatures, hashes, certificates, CA chains, trust stores, mTLS, and TLS foundations.',
+        keywords: 'asymmetric encryption public key private key signature hash certificate ca trust store chain mtls tls rsa ecc pki'
+      }
+    ]
+  },
+  {
+    title: 'Resources',
+    color: '#f0883e',
+    topics: [
+      {
+        title: 'Memory Units — Gi vs GB',
+        href: 'k8s-memory-units-gi-vs-gb.html',
+        tag: 'Resources',
+        desc: 'Binary vs decimal memory units, Gi, Mi, GB, OOMKill gotchas.',
+        keywords: 'memory units gi gb mi mb resources oomkill limits requests'
+      },
+      {
+        title: 'Requests & Limits — The Kitchen Story',
+        href: 'cka-requests-and-limits-story.html',
+        tag: 'Story',
+        desc: 'CPU and memory requests/limits, QoS classes, syntax mistakes, resource commands.',
+        keywords: 'requests limits cpu memory qos guaranteed burstable besteffort resources kubectl run'
+      }
+    ]
+  },
+  {
+    title: 'Scheduling & Placement',
+    color: '#58a6ff',
+    topics: [
+      {
+        title: 'Selectors, Affinity & Tolerations — The Story',
+        href: 'cka-scheduling-story.html',
+        tag: 'Story',
+        desc: 'nodeSelector, nodeAffinity, taints, tolerations, selectors, matchLabels, matchExpressions.',
+        keywords: 'selector affinity toleration taint nodeSelector nodeAffinity matchLabels matchExpressions scheduling'
+      },
+      {
+        title: 'nodeAffinity — Terms vs Expressions',
+        href: 'cka-nodeaffinity-terms.html',
+        tag: 'Scheduling',
+        desc: 'AND/OR logic of nodeSelectorTerms and matchExpressions.',
+        keywords: 'nodeaffinity terms expressions and or requiredDuringScheduling preferred weight'
+      },
+      {
+        title: 'PriorityClass — Scheduling Priority & Preemption',
+        href: 'cka-priorityclass.html',
+        tag: 'Scheduling',
+        desc: 'priorityClassName, preemptionPolicy, built-in system priorities, pod priority commands.',
+        keywords: 'priorityclass priorityClassName preemption preempt lower priority scheduling high-priority'
+      },
+      {
+        title: 'Multiple Schedulers — Custom Pod Placement',
+        href: 'cka-multiple-schedulers.html',
+        tag: 'Scheduling',
+        desc: 'Custom schedulers, schedulerName, default-scheduler, CKA YAML traps, and scheduler troubleshooting.',
+        keywords: 'multiple scheduler schedulers schedulerName spec.scheduler default-scheduler custom scheduler my-scheduler pending'
+      }
+    ]
+  },
+  {
+    title: 'Special Workloads',
+    color: '#bc8cff',
+    topics: [
+      {
+        title: 'DaemonSet — One Pod Per Node',
+        href: 'cka-daemonset.html',
+        tag: 'Workload',
+        desc: 'DaemonSet use cases, YAML, one pod per node, dry-run Deployment conversion.',
+        keywords: 'daemonset ds one pod per node fluentd kube-proxy cni dry-run deployment convert'
+      },
+      {
+        title: 'Static Pods — Kubelet-Managed Pods',
+        href: 'cka-static-pods.html',
+        tag: 'Workload',
+        desc: 'Static pod manifests, mirror pods, kubelet, control-plane components.',
+        keywords: 'static pod staticpod kubelet mirror pod /etc/kubernetes/manifests apiserver scheduler controller manager etcd'
+      }
+    ]
+  }
+];
+
+const indexEl = document.getElementById('index');
+const searchEl = document.getElementById('search');
+const countEl = document.getElementById('count');
+const emptyEl = document.getElementById('empty');
+
+function normalize(text) {
+  return text.toLowerCase().replace(/&amp;/g, '&');
+}
+
+function render(filter = '') {
+  const q = normalize(filter.trim());
+  indexEl.innerHTML = '';
+  let visible = 0;
+  let ordinal = 0;
+
+  sections.forEach(section => {
+    const matches = section.topics.filter(topic => {
+      const haystack = normalize(`${topic.title} ${topic.desc} ${topic.href} ${topic.tag} ${topic.keywords}`);
+      return !q || haystack.includes(q);
+    });
+
+    if (!matches.length) return;
+
+    const sectionTitle = document.createElement('div');
+    sectionTitle.className = 'section-title';
+    sectionTitle.textContent = section.title;
+    indexEl.appendChild(sectionTitle);
+
+    const list = document.createElement('div');
+    list.className = 'topic-list';
+
+    matches.forEach(topic => {
+      ordinal += 1;
+      visible += 1;
+      const item = document.createElement('a');
+      item.className = 'topic';
+      item.href = topic.href;
+      item.style.setProperty('--topic-color', section.color);
+      item.innerHTML = `
+        <div class="num">${String(ordinal).padStart(2, '0')}</div>
+        <div class="main">
+          <h2>${topic.title}</h2>
+          <p>${topic.desc}</p>
+        </div>
+        <div class="meta">
+          <span class="tag">${topic.tag}</span>
+          <span class="file">${topic.href}</span>
+        </div>
+      `;
+      list.appendChild(item);
+    });
+
+    indexEl.appendChild(list);
+  });
+
+  countEl.textContent = `${visible} topic${visible === 1 ? '' : 's'}`;
+  emptyEl.style.display = visible ? 'none' : 'block';
+}
+
+searchEl.addEventListener('input', event => render(event.target.value));
+render();
+</script>
+</body>
+</html>

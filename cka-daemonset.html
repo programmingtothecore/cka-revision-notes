@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CKA Revision — DaemonSet: One Pod Per Node</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface-2: #1c2128;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text-dim: #8b949e;
+    --accent: #58a6ff;
+    --accent-warm: #f0883e;
+    --green: #3fb950;
+    --red: #f85149;
+    --yellow: #e3b341;
+    --purple: #bc8cff;
+    --code-bg: #010409;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    line-height: 1.7;
+    padding: 2rem 1.5rem 5rem;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(circle at 15% 10%, rgba(88, 166, 255, 0.08), transparent 40%),
+      radial-gradient(circle at 85% 80%, rgba(240, 136, 62, 0.06), transparent 40%);
+  }
+
+  .container { max-width: 860px; margin: 0 auto; }
+
+  .back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--text-dim);
+    text-decoration: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    margin-bottom: 1.5rem;
+    transition: color 0.15s;
+  }
+  .back:hover { color: var(--accent); }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1.5rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 0.75rem;
+  }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 800;
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+  h1 .accent { color: var(--accent-warm); font-style: italic; }
+
+  .subtitle {
+    color: var(--text-dim);
+    margin-top: 0.75rem;
+    font-size: 1.05rem;
+  }
+
+  h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.6rem;
+    font-weight: 600;
+    margin-top: 3rem;
+    margin-bottom: 1rem;
+    letter-spacing: -0.01em;
+  }
+  h2::before {
+    content: "§ ";
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9em;
+  }
+
+  h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-top: 1.75rem;
+    margin-bottom: 0.6rem;
+    color: var(--text);
+  }
+
+  p { margin-bottom: 1rem; }
+  ul, ol { margin: 0.5rem 0 1.25rem 1.4rem; }
+  li { margin-bottom: 0.4rem; }
+
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--code-bg);
+    color: var(--accent-warm);
+    padding: 0.15em 0.4em;
+    border-radius: 4px;
+    font-size: 0.88em;
+    border: 1px solid var(--border);
+  }
+
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    overflow-x: auto;
+    margin: 1rem 0 1.5rem;
+  }
+  pre code {
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--text);
+    font-size: 0.85rem;
+    line-height: 1.6;
+  }
+
+  .annotation { color: var(--yellow); font-style: italic; }
+  .removed { color: var(--red); text-decoration: line-through; }
+  .added { color: var(--green); }
+
+  .key-fact {
+    background: linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent-warm);
+    padding: 1.1rem 1.5rem;
+    border-radius: 6px;
+    margin: 1.5rem 0;
+  }
+  .key-fact strong {
+    color: var(--accent-warm);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .scenario {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem 1.5rem;
+    margin: 1.25rem 0;
+    border-left: 4px solid var(--scenario-color, var(--accent));
+  }
+  .scenario .label {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--scenario-color, var(--accent));
+    background: rgba(88, 166, 255, 0.08);
+    padding: 0.2rem 0.55rem;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+  }
+  .scenario h3 { margin-top: 0; }
+  .scenario.good { --scenario-color: var(--green); }
+  .scenario.warn { --scenario-color: var(--yellow); }
+  .scenario.bad  { --scenario-color: var(--red); }
+  .scenario.info { --scenario-color: var(--accent); }
+  .scenario.story { --scenario-color: var(--purple); }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0 1.5rem;
+    background: var(--surface);
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    font-size: 0.92rem;
+  }
+  th, td {
+    text-align: left;
+    padding: 0.7rem 0.9rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  th {
+    background: var(--surface-2);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-dim);
+  }
+  tr:last-child td { border-bottom: none; }
+
+  .vs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin: 1rem 0 1.5rem;
+  }
+  .vs > div {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+  }
+  .vs h4 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .vs .red-h h4 { color: var(--red); }
+
+  .mistake {
+    background: rgba(248, 81, 73, 0.06);
+    border: 1px solid rgba(248, 81, 73, 0.25);
+    border-left: 4px solid var(--red);
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    margin: 1rem 0;
+  }
+  .mistake b { color: var(--red); font-family: 'JetBrains Mono', monospace; }
+
+  .tip {
+    background: rgba(63, 185, 80, 0.06);
+    border: 1px solid rgba(63, 185, 80, 0.25);
+    border-left: 4px solid var(--green);
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    margin: 1rem 0;
+  }
+  .tip b { color: var(--green); font-family: 'JetBrains Mono', monospace; }
+
+  .mantra {
+    text-align: center;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 1.25rem;
+    margin: 2.5rem 0 1rem;
+    padding: 1.5rem;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    color: var(--text-dim);
+  }
+  .mantra strong {
+    display: block;
+    color: var(--accent-warm);
+    font-style: normal;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 0.5rem;
+  }
+
+  footer {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    font-family: 'JetBrains Mono', monospace;
+    text-align: center;
+  }
+
+  @media (max-width: 600px) {
+    .vs { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back" href="index.html">← back to hub</a>
+
+  <header>
+    <div class="eyebrow">CKA · Workloads</div>
+    <h1>DaemonSet — <span class="accent">One Pod Per Node</span></h1>
+    <p class="subtitle">What it is, when to use it, and the dry-run-and-modify trick to deploy one without typing YAML from scratch.</p>
+  </header>
+
+  <div class="key-fact">
+    <strong>One sentence definition</strong>
+    <p style="margin: 0.6rem 0 0; color: var(--text);">
+      A <b>DaemonSet</b> is a controller that ensures <em>every node</em> (or every node matching a selector) runs exactly one copy of a pod. Add a node → a pod appears on it. Remove a node → its pod disappears.
+    </p>
+  </div>
+
+  <h2>The Mental Model</h2>
+  <p>If a Deployment is "I want N pods scattered around the cluster", a DaemonSet is "I want one pod <em>on every node</em> — wherever there are nodes, there are pods." The scheduler isn't really making a choice; the controller is mirroring the node list.</p>
+
+  <div class="scenario story">
+    <span class="label">analogy · the building inspector</span>
+    <p>Think of nodes as buildings and the DaemonSet as a building inspector. The rule is: <em>every building must have one inspector on duty</em>. Open a new building — an inspector is dispatched. Close a building — the inspector goes home. You don't choose how many inspectors total; the building count decides for you.</p>
+  </div>
+
+  <h2>When to Reach for a DaemonSet</h2>
+  <p>Anything that needs to be <em>per-node</em>, not per-app:</p>
+  <ul>
+    <li><b>Log collectors</b> — fluentd, fluent-bit, filebeat (read every node's logs).</li>
+    <li><b>Monitoring agents</b> — node-exporter, datadog-agent (one metric source per node).</li>
+    <li><b>Networking</b> — kube-proxy, CNI plugins (calico-node, cilium).</li>
+    <li><b>Storage drivers</b> — CSI node plugins.</li>
+    <li><b>Security agents</b> — falco, antivirus, runtime monitors.</li>
+  </ul>
+
+  <h2>DaemonSet vs Deployment</h2>
+
+  <div class="vs">
+    <div>
+      <h4>Deployment</h4>
+      <p>You declare <code>replicas: N</code>. Scheduler decides where they land. May co-locate two replicas on one node.</p>
+      <p><em>"I want this many pods, somewhere."</em></p>
+    </div>
+    <div>
+      <h4>DaemonSet</h4>
+      <p>No <code>replicas</code> field. Pod count = node count (filtered by node selector / taints). One per node, max.</p>
+      <p><em>"I want one pod, on every node."</em></p>
+    </div>
+  </div>
+
+  <h2>Anatomy of a DaemonSet</h2>
+
+<pre><code>apiVersion: apps/v1                    <span class="annotation"># same group as Deployment</span>
+kind: DaemonSet
+metadata:
+  name: fluentd-elasticsearch
+  namespace: kube-system
+  labels:
+    app: fluentd
+spec:
+  selector:                            <span class="annotation"># required, must match template labels</span>
+    matchLabels:
+      app: fluentd
+  template:                            <span class="annotation"># a normal Pod template</span>
+    metadata:
+      labels:
+        app: fluentd                   <span class="annotation"># MUST match selector above</span>
+    spec:
+      tolerations:                     <span class="annotation"># run on control-plane too</span>
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+      containers:
+        - name: fluentd
+          image: registry.k8s.io/fluentd-elasticsearch:1.20
+          resources:
+            requests:
+              cpu: 100m
+              memory: 200Mi
+            limits:
+              memory: 200Mi
+      terminationGracePeriodSeconds: 30</code></pre>
+
+  <h3>Differences from a Deployment YAML</h3>
+  <ul>
+    <li><code>kind: DaemonSet</code> instead of <code>kind: Deployment</code>.</li>
+    <li><b>No <code>replicas:</code></b> — count is dictated by node count.</li>
+    <li><b>No <code>strategy:</code></b> — DaemonSet uses <code>updateStrategy</code> instead (RollingUpdate / OnDelete).</li>
+    <li>Same <code>apps/v1</code>, same <code>selector</code> + <code>template</code> structure, same Pod spec.</li>
+  </ul>
+
+  <h2>Targeting Specific Nodes</h2>
+  <p>You usually don't want a DaemonSet on <em>literally</em> every node. Two ways to filter:</p>
+
+  <h3>Option 1 — <code>nodeSelector</code> on the template</h3>
+<pre><code>spec:
+  template:
+    spec:
+      nodeSelector:
+        disktype: ssd                  <span class="annotation"># only nodes with this label</span></code></pre>
+
+  <h3>Option 2 — <code>nodeAffinity</code> for richer rules</h3>
+<pre><code>spec:
+  template:
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: node-role.kubernetes.io/worker
+                    operator: Exists</code></pre>
+
+  <h3>Option 3 — Tolerations for tainted nodes</h3>
+  <p>Control-plane nodes are tainted by default with <code>node-role.kubernetes.io/control-plane:NoSchedule</code>. To run on them anyway (e.g. kube-proxy needs to), the DaemonSet must <em>tolerate</em> that taint.</p>
+
+  <h2>The Imperative Trick (no <code>kubectl create ds</code>)</h2>
+
+  <div class="scenario warn">
+    <span class="label">the gap</span>
+    <p><code>kubectl create</code> does <b>not</b> support DaemonSet. There's no <code>kubectl create ds</code>. You'll get an error if you try.</p>
+    <p>The official workaround: generate a Deployment YAML, then surgically convert it.</p>
+  </div>
+
+  <h3>Step 1 — Scaffold a Deployment</h3>
+<pre><code>kubectl create deployment fluentd-elasticsearch \
+  --image=registry.k8s.io/fluentd-elasticsearch:1.20 \
+  -n kube-system \
+  --dry-run=client -o yaml &gt; ds.yaml</code></pre>
+
+  <h3>Step 2 — Edit four things</h3>
+  <ol>
+    <li>Change <code>kind: <span class="removed">Deployment</span> <span class="added">DaemonSet</span></code></li>
+    <li>Delete the <code>replicas:</code> line</li>
+    <li>Delete the <code>strategy: {}</code> line</li>
+    <li>Delete the trailing <code>status: {}</code> line</li>
+  </ol>
+
+  <h3>Step 3 — Apply</h3>
+<pre><code>kubectl apply -f ds.yaml</code></pre>
+
+  <h3>One-liner version (sed)</h3>
+<pre><code>kubectl create deployment fluentd-elasticsearch \
+  --image=registry.k8s.io/fluentd-elasticsearch:1.20 \
+  -n kube-system --dry-run=client -o yaml \
+  | sed -e 's/kind: Deployment/kind: DaemonSet/' \
+        -e '/replicas:/d' \
+        -e '/strategy:/d' \
+        -e '/status:/,$d' \
+  | kubectl apply -f -</code></pre>
+
+  <div class="tip">
+    <b>✓ Why this works —</b> A Deployment template and a DaemonSet template share the exact same <code>selector</code> + <code>template</code> structure. The only fields a Deployment has that a DaemonSet doesn't are <code>replicas</code>, <code>strategy</code>, and a few status fields. Strip those and you've got a valid DaemonSet.
+  </div>
+
+  <h2>Common Mistakes</h2>
+
+  <div class="mistake">
+    <b>✗ Mistake 1 —</b> Running <code>kubectl create ds my-app --image=...</code>
+    <br>That subcommand doesn't exist. <code>kubectl</code> exits with <code>error: unknown command "ds"</code>. Use the dry-run trick.
+  </div>
+
+  <div class="mistake">
+    <b>✗ Mistake 2 —</b> Setting <code>replicas:</code> on a DaemonSet.
+    <br>The API server rejects it: <code>strict decoding error: unknown field "spec.replicas"</code>. The number of pods is decided by the node count.
+  </div>
+
+  <div class="mistake">
+    <b>✗ Mistake 3 —</b> <code>selector.matchLabels</code> not matching <code>template.metadata.labels</code>.
+    <br>Same trap as Deployments. The DaemonSet will be rejected at create time.
+  </div>
+
+  <div class="mistake">
+    <b>✗ Mistake 4 —</b> Expecting it to run on control-plane nodes by default.
+    <br>It won't, unless you add a <code>toleration</code> for <code>node-role.kubernetes.io/control-plane:NoSchedule</code>. Things like kube-proxy and CNI agents tolerate everything precisely for this reason.
+  </div>
+
+  <div class="mistake">
+    <b>✗ Mistake 5 —</b> Typo in the image registry.
+    <br><code>egistry.k8s.io</code> should be <code>registry.k8s.io</code>. Pod stays in <code>ImagePullBackOff</code>. Always check <code>kubectl describe pod</code> for image errors.
+  </div>
+
+  <div class="mistake">
+    <b>✗ Mistake 6 —</b> Forgetting <code>kind: DaemonSet</code> after using the dry-run trick.
+    <br>If you only delete <code>replicas</code> but forget to flip the <code>kind</code>, you've just built a Deployment with one pod. It schedules to one node, not all.
+  </div>
+
+  <h2>Update Strategies</h2>
+  <p>DaemonSet pods get rolled differently from Deployments. Two options:</p>
+
+  <table>
+    <tr><th>Strategy</th><th>Behaviour</th></tr>
+    <tr>
+      <td><code>RollingUpdate</code> (default)</td>
+      <td>Kill old pods one by one (respecting <code>maxUnavailable</code>), spin up new ones. Same node, same time.</td>
+    </tr>
+    <tr>
+      <td><code>OnDelete</code></td>
+      <td>Don't auto-replace anything. New pods only appear when you delete the old ones manually. Useful for very disruptive updates.</td>
+    </tr>
+  </table>
+
+<pre><code>spec:
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1                <span class="annotation"># or a percentage like "10%"</span></code></pre>
+
+  <h2>Useful Commands</h2>
+
+<pre><code># List DaemonSets in a namespace
+kubectl get ds -n kube-system
+
+# Wide view — desired vs current vs ready
+kubectl get ds fluentd-elasticsearch -n kube-system
+
+# See the pods it created (one per node)
+kubectl get pods -n kube-system -l app=fluentd -o wide
+
+# Describe (good for troubleshooting scheduling)
+kubectl describe ds fluentd-elasticsearch -n kube-system
+
+# Roll out a new image
+kubectl set image ds/fluentd-elasticsearch \
+  fluentd=registry.k8s.io/fluentd-elasticsearch:1.21 -n kube-system
+
+# Watch the rollout
+kubectl rollout status ds/fluentd-elasticsearch -n kube-system
+
+# Roll back if something breaks
+kubectl rollout undo ds/fluentd-elasticsearch -n kube-system
+
+# Delete the DaemonSet (and all its pods)
+kubectl delete ds fluentd-elasticsearch -n kube-system</code></pre>
+
+  <h2>Reading the STATUS Columns</h2>
+<pre><code>NAME           DESIRED  CURRENT  READY  UP-TO-DATE  AVAILABLE  NODE SELECTOR
+fluentd-es     3        3        3      3           3          &lt;none&gt;</code></pre>
+
+  <ul>
+    <li><b>DESIRED</b> — how many nodes the DaemonSet <em>wants</em> a pod on (after node selectors/taints are applied).</li>
+    <li><b>CURRENT</b> — pods that exist.</li>
+    <li><b>READY</b> — pods passing readiness probes.</li>
+    <li><b>UP-TO-DATE</b> — pods running the latest spec.</li>
+    <li><b>AVAILABLE</b> — pods ready for at least <code>minReadySeconds</code>.</li>
+  </ul>
+  <p>If <b>DESIRED ≠ CURRENT</b>, scheduling is being blocked — usually a missing toleration, a nodeSelector that matches no nodes, or insufficient resources.</p>
+
+  <h2>Imperative Quick Commands for CKA Exam</h2>
+  <p>There is no <code>kubectl create ds</code>. Generate Deployment YAML, then convert it.</p>
+
+<pre><code># Generate starter YAML
+kubectl create deployment fluentd \
+  --image=registry.k8s.io/fluentd-elasticsearch:1.20 \
+  --dry-run=client -o yaml &gt; ds.yaml
+
+# Edit ds.yaml:
+# kind: Deployment -&gt; DaemonSet
+# delete replicas, strategy, and status
+vi ds.yaml
+kubectl apply -f ds.yaml
+
+# Verify one pod per node
+kubectl get ds
+kubectl get pods -l app=fluentd -o wide</code></pre>
+
+  <div class="mantra">
+    <strong>The Mantra</strong>
+    "One pod per node. No replicas. No <code>kubectl create ds</code> — dry-run a Deployment and flip the kind."
+  </div>
+
+  <footer>cka_notes / workloads / daemonset.html</footer>
+
+</div>
+</body>
+</html>

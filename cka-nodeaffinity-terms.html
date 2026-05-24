@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CKA Revision — nodeAffinity Terms vs Expressions (AND/OR Logic)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface-2: #1c2128;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text-dim: #8b949e;
+    --accent: #58a6ff;
+    --accent-warm: #f0883e;
+    --green: #3fb950;
+    --red: #f85149;
+    --yellow: #e3b341;
+    --purple: #bc8cff;
+    --code-bg: #010409;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    line-height: 1.7;
+    padding: 2rem 1.5rem 5rem;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(circle at 15% 10%, rgba(88, 166, 255, 0.08), transparent 40%),
+      radial-gradient(circle at 85% 80%, rgba(240, 136, 62, 0.06), transparent 40%);
+  }
+
+  .container { max-width: 860px; margin: 0 auto; }
+
+  .back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--text-dim);
+    text-decoration: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    margin-bottom: 1.5rem;
+    transition: color 0.15s;
+  }
+  .back:hover { color: var(--accent); }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1.5rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 0.75rem;
+  }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 800;
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+  h1 .accent { color: var(--accent-warm); font-style: italic; }
+
+  .subtitle {
+    color: var(--text-dim);
+    margin-top: 0.75rem;
+    font-size: 1.05rem;
+  }
+
+  h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.6rem;
+    font-weight: 600;
+    margin-top: 3rem;
+    margin-bottom: 1rem;
+    letter-spacing: -0.01em;
+  }
+  h2::before {
+    content: "§ ";
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9em;
+  }
+
+  h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-top: 1.75rem;
+    margin-bottom: 0.6rem;
+    color: var(--text);
+  }
+
+  p { margin-bottom: 1rem; }
+  ul, ol { margin: 0.5rem 0 1.25rem 1.4rem; }
+  li { margin-bottom: 0.4rem; }
+
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--code-bg);
+    color: var(--accent-warm);
+    padding: 0.15em 0.4em;
+    border-radius: 4px;
+    font-size: 0.88em;
+    border: 1px solid var(--border);
+  }
+
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    overflow-x: auto;
+    margin: 1rem 0 1.5rem;
+  }
+  pre code {
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--text);
+    font-size: 0.85rem;
+    line-height: 1.6;
+  }
+
+  .annotation { color: var(--yellow); font-style: italic; }
+
+  .key-fact {
+    background: linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent-warm);
+    padding: 1.1rem 1.5rem;
+    border-radius: 6px;
+    margin: 1.5rem 0;
+  }
+  .key-fact strong {
+    color: var(--accent-warm);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .vs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin: 1.5rem 0;
+  }
+  .vs > div {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+  }
+  .vs h4 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    margin-bottom: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .vs .and-card { border-left: 4px solid var(--green); }
+  .vs .or-card  { border-left: 4px solid var(--red); }
+  .vs .and-card h4 { color: var(--green); }
+  .vs .or-card h4  { color: var(--red); }
+  .and-label { color: var(--green); font-weight: 700; }
+  .or-label  { color: var(--red);   font-weight: 700; }
+  .vs pre { margin: 0.5rem 0; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0 1.5rem;
+    background: var(--surface);
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    font-size: 0.92rem;
+  }
+  th, td {
+    text-align: left;
+    padding: 0.7rem 0.9rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  th {
+    background: var(--surface-2);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-dim);
+  }
+  tr:last-child td { border-bottom: none; }
+  td.match-yes { color: var(--green); font-weight: 700; }
+  td.match-no  { color: var(--red);   font-weight: 700; }
+
+  .scenario {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem 1.5rem;
+    margin: 1.25rem 0;
+    border-left: 4px solid var(--scenario-color, var(--accent));
+  }
+  .scenario .label {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--scenario-color, var(--accent));
+    background: rgba(88, 166, 255, 0.08);
+    padding: 0.2rem 0.55rem;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+  }
+  .scenario.recipe { --scenario-color: var(--accent-warm); }
+
+  .mistake {
+    background: rgba(248, 81, 73, 0.06);
+    border: 1px solid rgba(248, 81, 73, 0.25);
+    border-left: 4px solid var(--red);
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    margin: 1rem 0;
+  }
+  .mistake b { color: var(--red); font-family: 'JetBrains Mono', monospace; }
+
+  .mantra {
+    text-align: center;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 1.25rem;
+    margin: 2.5rem 0 1rem;
+    padding: 1.5rem;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    color: var(--text-dim);
+  }
+  .mantra strong {
+    display: block;
+    color: var(--accent-warm);
+    font-style: normal;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 0.5rem;
+  }
+
+  footer {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    font-family: 'JetBrains Mono', monospace;
+    text-align: center;
+  }
+
+  @media (max-width: 600px) {
+    .vs { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back" href="index.html">← back to hub</a>
+
+  <header>
+    <div class="eyebrow">CKA · Scheduling</div>
+    <h1>nodeAffinity — <span class="accent">Terms vs Expressions</span></h1>
+    <p class="subtitle">Understanding AND/OR logic in node selection rules.</p>
+  </header>
+
+  <div class="key-fact">
+    <strong>The one line you need to remember</strong>
+    <p style="margin: 0.6rem 0 0; color: var(--text);">
+      <b style="color: var(--green);">Terms are OR-ed.</b> &nbsp;|&nbsp;
+      <b style="color: var(--accent);">Expressions inside a term are AND-ed.</b>
+    </p>
+  </div>
+
+  <h2>The Structure, Layer by Layer</h2>
+
+<pre><code>affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:           <span class="annotation"># LIST — items here are OR'd</span>
+        - matchExpressions:        <span class="annotation"># LIST — items here are AND'd</span>
+            - key: color
+              operator: In
+              values:
+                - blue</code></pre>
+
+  <p>Each level adds one piece of meaning:</p>
+  <ol>
+    <li><code>affinity</code> → "scheduling rules ahead"</li>
+    <li><code>nodeAffinity</code> → "...about NODES specifically"</li>
+    <li><code>requiredDuring...</code> → "...and it's a hard rule"</li>
+    <li><code>nodeSelectorTerms</code> → "...here are my OR-groups"</li>
+    <li><code>matchExpressions</code> → "...each group has these AND-conditions"</li>
+  </ol>
+
+  <h2>The Recipe Analogy</h2>
+
+  <div class="scenario recipe">
+    <span class="label">a term = one complete recipe</span>
+    <p>Each <b>term</b> is a full recipe for an acceptable node. Each <b>expression</b> inside a term is an ingredient that recipe requires.</p>
+    <ul>
+      <li>Multiple ingredients in one recipe → all must be present (<span class="and-label">AND</span>)</li>
+      <li>Multiple recipes → any one of them works (<span class="or-label">OR</span>)</li>
+    </ul>
+  </div>
+
+  <h2>Side-by-Side: One Term vs Two Terms</h2>
+
+  <div class="vs">
+    <div class="and-card">
+      <h4>1 term, 2 expressions = <span class="and-label">AND</span></h4>
+<pre><code>nodeSelectorTerms:
+  - matchExpressions:
+      - key: hardware
+        operator: In
+        values: [gpu]
+      - key: zone
+        operator: In
+        values: [us-east]</code></pre>
+      <p style="margin-top: 0.75rem;"><b>Reads as:</b></p>
+      <p><code>hardware=gpu</code> <span class="and-label">AND</span> <code>zone=us-east</code></p>
+      <p><em>Single recipe, two required ingredients.</em></p>
+    </div>
+
+    <div class="or-card">
+      <h4>2 terms = <span class="or-label">OR</span></h4>
+<pre><code>nodeSelectorTerms:
+  - matchExpressions:
+      - key: hardware
+        operator: In
+        values: [gpu]
+  - matchExpressions:
+      - key: zone
+        operator: In
+        values: [us-east]</code></pre>
+      <p style="margin-top: 0.75rem;"><b>Reads as:</b></p>
+      <p><code>hardware=gpu</code> <span class="or-label">OR</span> <code>zone=us-east</code></p>
+      <p><em>Two separate recipes, either works.</em></p>
+    </div>
+  </div>
+
+  <h2>Full Example — Mixed AND/OR</h2>
+
+  <p><b>Goal:</b> Schedule on nodes that are <em>(color=blue AND zone=us-east) OR (color=red)</em></p>
+
+<pre><code>apiVersion: v1
+kind: Pod
+metadata:
+  name: flexible-pod
+spec:
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:           <span class="annotation"># Term 1</span>
+              - key: color
+                operator: In
+                values:
+                  - blue
+              - key: zone
+                operator: In
+                values:
+                  - us-east
+          - matchExpressions:           <span class="annotation"># Term 2</span>
+              - key: color
+                operator: In
+                values:
+                  - red
+  containers:
+    - name: nginx
+      image: nginx</code></pre>
+
+  <h3>Visual breakdown</h3>
+<pre><code>nodeSelectorTerms:
+  - matchExpressions:
+      - color In [blue]    ┐ AND
+      - zone  In [us-east] ┘
+                                  ← OR ←
+  - matchExpressions:
+      - color In [red]</code></pre>
+
+  <h2>Truth Table</h2>
+
+  <table>
+    <tr><th>Node labels</th><th>Matches?</th><th>Why</th></tr>
+    <tr>
+      <td><code>color=blue, zone=us-east</code></td>
+      <td class="match-yes">YES</td>
+      <td>Satisfies Term 1 fully</td>
+    </tr>
+    <tr>
+      <td><code>color=blue, zone=eu-west</code></td>
+      <td class="match-no">NO</td>
+      <td>Term 1 fails (zone wrong); Term 2 fails (color not red)</td>
+    </tr>
+    <tr>
+      <td><code>color=red, zone=eu-west</code></td>
+      <td class="match-yes">YES</td>
+      <td>Satisfies Term 2 (color=red is enough)</td>
+    </tr>
+    <tr>
+      <td><code>color=red, zone=us-east</code></td>
+      <td class="match-yes">YES</td>
+      <td>Satisfies Term 2</td>
+    </tr>
+    <tr>
+      <td><code>color=green</code></td>
+      <td class="match-no">NO</td>
+      <td>Neither term matches</td>
+    </tr>
+  </table>
+
+  <h2>What Counts as "One Term"?</h2>
+
+  <p>A <b>term</b> is one item under <code>nodeSelectorTerms</code> — everything from one <code>-</code> to the next <code>-</code>.</p>
+
+<pre><code>nodeSelectorTerms:
+  - matchExpressions:           <span class="annotation"># ─── TERM 1 starts ───</span>
+      - key: hardware
+        operator: In
+        values: [gpu]
+                                <span class="annotation"># ─── TERM 1 ends ─────</span>
+  - matchExpressions:           <span class="annotation"># ─── TERM 2 starts ───</span>
+      - key: memory-tier
+        operator: In
+        values: [high]
+                                <span class="annotation"># ─── TERM 2 ends ─────</span></code></pre>
+
+  <p>The <code>-</code> at the term level is the boundary. Each list item under <code>nodeSelectorTerms</code> is one term, and each term is one self-contained recipe.</p>
+
+  <h2>Why Not Just Use nodeSelector?</h2>
+
+  <p><code>nodeSelector</code> can <b>only</b> express AND between conditions. The moment you need OR logic, you've outgrown <code>nodeSelector</code> and have to reach for <code>nodeAffinity</code>. That's the main reason the heavier syntax exists.</p>
+
+  <table>
+    <tr><th>Need</th><th>Use</th></tr>
+    <tr><td>Match all listed labels (AND)</td><td><code>nodeSelector</code> — simpler, 3 lines</td></tr>
+    <tr><td>OR between groups</td><td><code>nodeAffinity</code> with multiple terms</td></tr>
+    <tr><td>NotIn / Exists / DoesNotExist</td><td><code>nodeAffinity</code></td></tr>
+    <tr><td>Numeric comparisons (Gt, Lt)</td><td><code>nodeAffinity</code></td></tr>
+    <tr><td>Soft preference (best-effort)</td><td><code>preferredDuringScheduling...</code></td></tr>
+  </table>
+
+  <div class="mistake">
+    <b>✗ The Silent Killer —</b> The indentation between "1 term with 2 expressions" and "2 terms with 1 expression each" looks <em>almost identical</em>, but the logic flips completely (AND ↔ OR).
+    <br>In the exam, slow down at this exact spot. Count the <code>-</code> at the <code>nodeSelectorTerms</code> level — that's how many recipes you have.
+  </div>
+
+  <h2>Imperative Quick Commands for CKA Exam</h2>
+  <p>There is no clean flag for nodeAffinity. Generate YAML, then add the affinity block under <code>spec.affinity</code> for a Pod or <code>spec.template.spec.affinity</code> for a Deployment.</p>
+
+<pre><code># Generate a Pod YAML and edit affinity
+kubectl run nginx --image=nginx --dry-run=client -o yaml &gt; pod-affinity.yaml
+vi pod-affinity.yaml
+kubectl apply -f pod-affinity.yaml
+
+# Generate Deployment YAML and edit template affinity
+kubectl create deployment nginx --image=nginx --dry-run=client -o yaml &gt; deploy-affinity.yaml
+vi deploy-affinity.yaml
+kubectl apply -f deploy-affinity.yaml
+
+# Verify scheduling
+kubectl get pods -o wide
+kubectl describe pod &lt;pod-name&gt;</code></pre>
+
+  <div class="mantra">
+    <strong>The Mantra</strong>
+    "Terms are recipes (OR). Expressions are ingredients (AND)."
+  </div>
+
+  <footer>cka_notes / scheduling / nodeaffinity_terms.html</footer>
+
+</div>
+</body>
+</html>

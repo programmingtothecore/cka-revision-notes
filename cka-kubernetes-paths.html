@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CKA Revision — Kubernetes Paths: Files You Must Know</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface-2: #1c2128;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text-dim: #8b949e;
+    --accent: #58a6ff;
+    --accent-warm: #f0883e;
+    --green: #3fb950;
+    --red: #f85149;
+    --yellow: #e3b341;
+    --purple: #bc8cff;
+    --code-bg: #010409;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    line-height: 1.7;
+    padding: 2rem 1.5rem 5rem;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(circle at 15% 10%, rgba(88, 166, 255, 0.08), transparent 40%),
+      radial-gradient(circle at 85% 80%, rgba(240, 136, 62, 0.06), transparent 40%);
+  }
+
+  .container { max-width: 860px; margin: 0 auto; }
+
+  .back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--text-dim);
+    text-decoration: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    margin-bottom: 1.5rem;
+    transition: color 0.15s;
+  }
+  .back:hover { color: var(--accent); }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1.5rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 0.75rem;
+  }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 800;
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+  h1 .accent { color: var(--accent-warm); font-style: italic; }
+
+  .subtitle {
+    color: var(--text-dim);
+    margin-top: 0.75rem;
+    font-size: 1.05rem;
+  }
+
+  h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.6rem;
+    font-weight: 600;
+    margin-top: 3rem;
+    margin-bottom: 1rem;
+    letter-spacing: -0.01em;
+  }
+  h2::before {
+    content: "§ ";
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9em;
+  }
+
+  h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-top: 1.75rem;
+    margin-bottom: 0.6rem;
+    color: var(--text);
+  }
+
+  p { margin-bottom: 1rem; }
+  ul, ol { margin: 0.5rem 0 1.25rem 1.4rem; }
+  li { margin-bottom: 0.4rem; }
+
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--code-bg);
+    color: var(--accent-warm);
+    padding: 0.15em 0.4em;
+    border-radius: 4px;
+    font-size: 0.88em;
+    border: 1px solid var(--border);
+  }
+
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    overflow-x: auto;
+    margin: 1rem 0 1.5rem;
+  }
+  pre code {
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--text);
+    font-size: 0.85rem;
+    line-height: 1.6;
+  }
+
+  .key-fact {
+    background: linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent-warm);
+    padding: 1.1rem 1.5rem;
+    border-radius: 6px;
+    margin: 1.5rem 0;
+  }
+  .key-fact strong {
+    color: var(--accent-warm);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .scenario {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem 1.5rem;
+    margin: 1.25rem 0;
+    border-left: 4px solid var(--scenario-color, var(--accent));
+  }
+  .scenario .label {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--scenario-color, var(--accent));
+    background: rgba(88, 166, 255, 0.08);
+    padding: 0.2rem 0.55rem;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+  }
+  .scenario.good { --scenario-color: var(--green); }
+  .scenario.warn { --scenario-color: var(--yellow); }
+  .scenario.info { --scenario-color: var(--accent); }
+  .scenario.story { --scenario-color: var(--purple); }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0 1.5rem;
+    background: var(--surface);
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    font-size: 0.92rem;
+  }
+  th, td {
+    text-align: left;
+    padding: 0.7rem 0.9rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  th {
+    background: var(--surface-2);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-dim);
+  }
+  tr:last-child td { border-bottom: none; }
+
+  .mistake {
+    background: rgba(248, 81, 73, 0.06);
+    border: 1px solid rgba(248, 81, 73, 0.25);
+    border-left: 4px solid var(--red);
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    margin: 1rem 0;
+  }
+  .mistake b { color: var(--red); font-family: 'JetBrains Mono', monospace; }
+
+  .tip {
+    background: rgba(63, 185, 80, 0.06);
+    border: 1px solid rgba(63, 185, 80, 0.25);
+    border-left: 4px solid var(--green);
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    margin: 1rem 0;
+  }
+  .tip b { color: var(--green); font-family: 'JetBrains Mono', monospace; }
+
+  .mantra {
+    text-align: center;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 1.25rem;
+    margin: 2.5rem 0 1rem;
+    padding: 1.5rem;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    color: var(--text-dim);
+  }
+  .mantra strong {
+    display: block;
+    color: var(--accent-warm);
+    font-style: normal;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 0.5rem;
+  }
+
+  footer {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    font-family: 'JetBrains Mono', monospace;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back" href="index.html">← back to hub</a>
+
+  <header>
+    <div class="eyebrow">CKA · Fundamentals</div>
+    <h1>Kubernetes Paths — <span class="accent">Files You Must Know</span></h1>
+    <p class="subtitle">A fast map of where kubeconfigs, static pod manifests, certs, kubelet config, etcd data, logs, and systemd units usually live.</p>
+  </header>
+
+  <div class="key-fact">
+    <strong>One sentence definition</strong>
+    <p style="margin: 0.6rem 0 0; color: var(--text);">
+      In CKA troubleshooting, half the job is knowing which file to inspect: kubeadm clusters keep most important control-plane files under <code>/etc/kubernetes</code> and kubelet state under <code>/var/lib/kubelet</code>.
+    </p>
+  </div>
+
+  <h2>The Big Map</h2>
+  <table>
+    <tr><th>Path</th><th>What lives there</th><th>When you use it</th></tr>
+    <tr>
+      <td><code>/etc/kubernetes/manifests</code></td>
+      <td>Static pod manifests: <code>kube-apiserver.yaml</code>, <code>kube-scheduler.yaml</code>, <code>kube-controller-manager.yaml</code>, <code>etcd.yaml</code></td>
+      <td>Fix control-plane pods, edit API server flags, stop/restart static pods.</td>
+    </tr>
+    <tr>
+      <td><code>/etc/kubernetes/admin.conf</code></td>
+      <td>Admin kubeconfig</td>
+      <td>Use <code>kubectl</code> as cluster admin.</td>
+    </tr>
+    <tr>
+      <td><code>/etc/kubernetes/kubelet.conf</code></td>
+      <td>Kubelet kubeconfig</td>
+      <td>Kubelet's client credentials to talk to the API server.</td>
+    </tr>
+    <tr>
+      <td><code>/etc/kubernetes/controller-manager.conf</code></td>
+      <td>Controller manager kubeconfig</td>
+      <td>Control-plane component authentication.</td>
+    </tr>
+    <tr>
+      <td><code>/etc/kubernetes/scheduler.conf</code></td>
+      <td>Scheduler kubeconfig</td>
+      <td>Scheduler authentication to API server.</td>
+    </tr>
+    <tr>
+      <td><code>/etc/kubernetes/pki</code></td>
+      <td>Kubernetes certificates and keys</td>
+      <td>Check certs, CA files, API server cert paths.</td>
+    </tr>
+    <tr>
+      <td><code>/var/lib/kubelet/config.yaml</code></td>
+      <td>Kubelet config file</td>
+      <td>Find <code>staticPodPath</code>, cluster DNS, cgroup driver, auth settings.</td>
+    </tr>
+    <tr>
+      <td><code>/var/lib/etcd</code></td>
+      <td>Default etcd data directory</td>
+      <td>Backups, restores, data-dir checks.</td>
+    </tr>
+    <tr>
+      <td><code>/var/lib/kubelet/pods</code></td>
+      <td>Kubelet's local pod state</td>
+      <td>Deep node troubleshooting; mounted volumes and pod directories.</td>
+    </tr>
+    <tr>
+      <td><code>~/.kube/config</code></td>
+      <td>User kubeconfig</td>
+      <td>Your normal shell's <code>kubectl</code> config.</td>
+    </tr>
+  </table>
+
+  <h2>Control Plane Manifests</h2>
+  <p>In kubeadm clusters, the control plane is usually Static Pods. The kubelet watches this directory:</p>
+
+<pre><code>/etc/kubernetes/manifests</code></pre>
+
+  <table>
+    <tr><th>File</th><th>Component</th><th>Common reason to open it</th></tr>
+    <tr><td><code>kube-apiserver.yaml</code></td><td>API server</td><td>Add/edit admission plugins, cert paths, authorization flags, etcd connection.</td></tr>
+    <tr><td><code>kube-controller-manager.yaml</code></td><td>Controller manager</td><td>Cluster CIDR, controllers, service account signing flags.</td></tr>
+    <tr><td><code>kube-scheduler.yaml</code></td><td>Scheduler</td><td>Scheduler config, profiles, policy-related troubleshooting.</td></tr>
+    <tr><td><code>etcd.yaml</code></td><td>etcd</td><td>Data directory, certs, listen/client URLs.</td></tr>
+  </table>
+
+  <div class="scenario warn">
+    <span class="label">careful</span>
+    <p>Saving a file in <code>/etc/kubernetes/manifests</code> makes kubelet restart that static pod. A bad edit to <code>kube-apiserver.yaml</code> can make <code>kubectl</code> stop working until you fix the local file.</p>
+  </div>
+
+  <h2>Kubeconfig Locations</h2>
+  <p>A kubeconfig is the file that tells a client how to reach the API server and which credentials to use.</p>
+
+  <table>
+    <tr><th>Path</th><th>Who uses it</th><th>Notes</th></tr>
+    <tr><td><code>~/.kube/config</code></td><td>Human user</td><td>Default path for <code>kubectl</code>.</td></tr>
+    <tr><td><code>/etc/kubernetes/admin.conf</code></td><td>Cluster admin</td><td>Often copied to <code>~/.kube/config</code>.</td></tr>
+    <tr><td><code>/etc/kubernetes/kubelet.conf</code></td><td>Kubelet</td><td>Lets kubelet authenticate to the API server.</td></tr>
+    <tr><td><code>/etc/kubernetes/controller-manager.conf</code></td><td>Controller manager</td><td>Used by the static pod command.</td></tr>
+    <tr><td><code>/etc/kubernetes/scheduler.conf</code></td><td>Scheduler</td><td>Used by the static pod command.</td></tr>
+  </table>
+
+<pre><code># Use admin kubeconfig directly
+kubectl --kubeconfig=/etc/kubernetes/admin.conf get nodes
+
+# Make it your default user kubeconfig
+mkdir -p ~/.kube
+sudo cp /etc/kubernetes/admin.conf ~/.kube/config
+sudo chown $(id -u):$(id -g) ~/.kube/config</code></pre>
+
+  <h2>Certificates</h2>
+  <p>Most kubeadm certs live under <code>/etc/kubernetes/pki</code>.</p>
+
+  <table>
+    <tr><th>Path</th><th>Meaning</th></tr>
+    <tr><td><code>/etc/kubernetes/pki/ca.crt</code></td><td>Cluster CA certificate.</td></tr>
+    <tr><td><code>/etc/kubernetes/pki/ca.key</code></td><td>Cluster CA private key. Very sensitive.</td></tr>
+    <tr><td><code>/etc/kubernetes/pki/apiserver.crt</code></td><td>API server serving certificate.</td></tr>
+    <tr><td><code>/etc/kubernetes/pki/apiserver.key</code></td><td>API server private key.</td></tr>
+    <tr><td><code>/etc/kubernetes/pki/front-proxy-ca.crt</code></td><td>Front proxy CA.</td></tr>
+    <tr><td><code>/etc/kubernetes/pki/etcd</code></td><td>etcd CA, server, peer, and client certs.</td></tr>
+  </table>
+
+<pre><code># Check certificate expiry
+kubeadm certs check-expiration
+
+# Inspect one cert
+openssl x509 -in /etc/kubernetes/pki/apiserver.crt -text -noout</code></pre>
+
+  <h2>Kubelet Paths</h2>
+  <table>
+    <tr><th>Path</th><th>What it is</th></tr>
+    <tr><td><code>/var/lib/kubelet/config.yaml</code></td><td>Main kubelet config. Look for <code>staticPodPath</code>.</td></tr>
+    <tr><td><code>/var/lib/kubelet/kubeadm-flags.env</code></td><td>Kubeadm-managed kubelet flags.</td></tr>
+    <tr><td><code>/var/lib/kubelet/pods</code></td><td>Local pod data directories.</td></tr>
+    <tr><td><code>/var/lib/kubelet/plugins</code></td><td>CSI and kubelet plugin data.</td></tr>
+  </table>
+
+<pre><code># Find static pod path
+sudo grep -n "staticPodPath" /var/lib/kubelet/config.yaml
+
+# Read kubelet service config
+systemctl cat kubelet
+
+# Follow kubelet logs
+journalctl -u kubelet -f</code></pre>
+
+  <h2>etcd Paths</h2>
+  <p>For kubeadm, etcd usually runs as a Static Pod and stores data here:</p>
+
+<pre><code>/var/lib/etcd</code></pre>
+
+  <p>The exact value is visible in the etcd manifest:</p>
+
+<pre><code>sudo grep -n "data-dir" /etc/kubernetes/manifests/etcd.yaml</code></pre>
+
+  <div class="tip">
+    <b>✓ Exam shortcut —</b> For backup/restore questions, inspect <code>/etc/kubernetes/manifests/etcd.yaml</code> for endpoints, cert paths, and <code>--data-dir</code>. Do not rely only on memory.
+  </div>
+
+  <h2>Logs &amp; Runtime</h2>
+  <table>
+    <tr><th>Command / Path</th><th>Use</th></tr>
+    <tr><td><code>journalctl -u kubelet</code></td><td>Kubelet service logs.</td></tr>
+    <tr><td><code>crictl ps</code></td><td>Container runtime view of running containers.</td></tr>
+    <tr><td><code>crictl logs &lt;container-id&gt;</code></td><td>Container logs when <code>kubectl logs</code> is unavailable.</td></tr>
+    <tr><td><code>/var/log/pods</code></td><td>Pod log files on many Linux nodes.</td></tr>
+    <tr><td><code>/var/log/containers</code></td><td>Container log symlinks on many Linux nodes.</td></tr>
+  </table>
+
+  <h2>Common Mistakes</h2>
+  <div class="mistake">
+    <b>✗ Mistake 1 —</b> Editing the mirror pod with <code>kubectl edit</code>.
+    <br>For static pods, edit the file in <code>/etc/kubernetes/manifests</code>.
+  </div>
+
+  <div class="mistake">
+    <b>✗ Mistake 2 —</b> Forgetting that <code>admin.conf</code> is not the kubelet's kubeconfig.
+    <br>Humans use <code>admin.conf</code>; kubelet uses <code>/etc/kubernetes/kubelet.conf</code>.
+  </div>
+
+  <div class="mistake">
+    <b>✗ Mistake 3 —</b> Searching random places for static pods.
+    <br>Read <code>staticPodPath</code> from <code>/var/lib/kubelet/config.yaml</code>. In kubeadm it is usually <code>/etc/kubernetes/manifests</code>.
+  </div>
+
+  <h2>Imperative Quick Commands for CKA Exam</h2>
+
+<pre><code># Use admin kubeconfig for one command
+kubectl --kubeconfig=/etc/kubernetes/admin.conf get nodes
+
+# Set default kubeconfig for your user
+mkdir -p ~/.kube
+sudo cp /etc/kubernetes/admin.conf ~/.kube/config
+sudo chown $(id -u):$(id -g) ~/.kube/config
+
+# Find static pod path and inspect manifests
+sudo grep -n "staticPodPath" /var/lib/kubelet/config.yaml
+sudo ls -l /etc/kubernetes/manifests
+
+# Check kubelet and certs
+systemctl cat kubelet
+journalctl -u kubelet -f
+kubeadm certs check-expiration</code></pre>
+
+  <h2>Quick-Recall Drill</h2>
+  <table>
+    <tr><th>Question</th><th>Answer</th></tr>
+    <tr><td>Static pod manifests?</td><td><code>/etc/kubernetes/manifests</code></td></tr>
+    <tr><td>Admin kubeconfig?</td><td><code>/etc/kubernetes/admin.conf</code></td></tr>
+    <tr><td>Default user kubeconfig?</td><td><code>~/.kube/config</code></td></tr>
+    <tr><td>Kubelet kubeconfig?</td><td><code>/etc/kubernetes/kubelet.conf</code></td></tr>
+    <tr><td>Kubelet config?</td><td><code>/var/lib/kubelet/config.yaml</code></td></tr>
+    <tr><td>Kubernetes certs?</td><td><code>/etc/kubernetes/pki</code></td></tr>
+    <tr><td>Default etcd data dir?</td><td><code>/var/lib/etcd</code></td></tr>
+    <tr><td>Kubelet logs?</td><td><code>journalctl -u kubelet</code></td></tr>
+  </table>
+
+  <div class="mantra">
+    <strong>The Mantra</strong>
+    "Manifests in etc/kubernetes. Kubelet state in var/lib/kubelet. User kubectl in ~/.kube/config."
+  </div>
+
+  <footer>cka_notes / fundamentals / kubernetes-paths.html</footer>
+
+</div>
+</body>
+</html>

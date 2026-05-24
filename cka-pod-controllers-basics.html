@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CKA Revision — Pods &amp; Controllers: The Basics Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface-2: #1c2128;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text-dim: #8b949e;
+    --accent: #58a6ff;
+    --accent-warm: #f0883e;
+    --green: #3fb950;
+    --red: #f85149;
+    --yellow: #e3b341;
+    --purple: #bc8cff;
+    --code-bg: #010409;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    line-height: 1.7;
+    padding: 2rem 1.5rem 5rem;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(circle at 15% 10%, rgba(88, 166, 255, 0.08), transparent 40%),
+      radial-gradient(circle at 85% 80%, rgba(240, 136, 62, 0.06), transparent 40%);
+  }
+
+  .container { max-width: 860px; margin: 0 auto; }
+
+  .back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--text-dim);
+    text-decoration: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    margin-bottom: 1.5rem;
+    transition: color 0.15s;
+  }
+  .back:hover { color: var(--accent); }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1.5rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 0.75rem;
+  }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 800;
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+  h1 .accent { color: var(--accent-warm); font-style: italic; }
+
+  .subtitle {
+    color: var(--text-dim);
+    margin-top: 0.75rem;
+    font-size: 1.05rem;
+  }
+
+  h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.6rem;
+    font-weight: 600;
+    margin-top: 3rem;
+    margin-bottom: 1rem;
+    letter-spacing: -0.01em;
+  }
+  h2::before {
+    content: "§ ";
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9em;
+  }
+
+  h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-top: 1.75rem;
+    margin-bottom: 0.6rem;
+    color: var(--text);
+  }
+
+  p { margin-bottom: 1rem; }
+  ul, ol { margin: 0.5rem 0 1.25rem 1.4rem; }
+  li { margin-bottom: 0.4rem; }
+
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--code-bg);
+    color: var(--accent-warm);
+    padding: 0.15em 0.4em;
+    border-radius: 4px;
+    font-size: 0.88em;
+    border: 1px solid var(--border);
+  }
+
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    overflow-x: auto;
+    margin: 1rem 0 1.5rem;
+  }
+  pre code {
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--text);
+    font-size: 0.85rem;
+    line-height: 1.6;
+  }
+
+  .annotation { color: var(--yellow); font-style: italic; }
+
+  .key-fact {
+    background: linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent-warm);
+    padding: 1.1rem 1.5rem;
+    border-radius: 6px;
+    margin: 1.5rem 0;
+  }
+  .key-fact strong {
+    color: var(--accent-warm);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .scenario {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem 1.5rem;
+    margin: 1.25rem 0;
+    border-left: 4px solid var(--scenario-color, var(--accent));
+  }
+  .scenario .label {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--scenario-color, var(--accent));
+    background: rgba(88, 166, 255, 0.08);
+    padding: 0.2rem 0.55rem;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+  }
+  .scenario h3 { margin-top: 0; }
+  .scenario.good { --scenario-color: var(--green); }
+  .scenario.warn { --scenario-color: var(--yellow); }
+  .scenario.bad  { --scenario-color: var(--red); }
+  .scenario.info { --scenario-color: var(--accent); }
+  .scenario.story { --scenario-color: var(--purple); }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0 1.5rem;
+    background: var(--surface);
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    font-size: 0.92rem;
+  }
+  th, td {
+    text-align: left;
+    padding: 0.7rem 0.9rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  th {
+    background: var(--surface-2);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-dim);
+  }
+  tr:last-child td { border-bottom: none; }
+
+  .mistake {
+    background: rgba(248, 81, 73, 0.06);
+    border: 1px solid rgba(248, 81, 73, 0.25);
+    border-left: 4px solid var(--red);
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    margin: 1rem 0;
+  }
+  .mistake b { color: var(--red); font-family: 'JetBrains Mono', monospace; }
+
+  .tip {
+    background: rgba(63, 185, 80, 0.06);
+    border: 1px solid rgba(63, 185, 80, 0.25);
+    border-left: 4px solid var(--green);
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    margin: 1rem 0;
+  }
+  .tip b { color: var(--green); font-family: 'JetBrains Mono', monospace; }
+
+  .mantra {
+    text-align: center;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 1.25rem;
+    margin: 2.5rem 0 1rem;
+    padding: 1.5rem;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    color: var(--text-dim);
+  }
+  .mantra strong {
+    display: block;
+    color: var(--accent-warm);
+    font-style: normal;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 0.5rem;
+  }
+
+  footer {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    font-family: 'JetBrains Mono', monospace;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back" href="index.html">← back to hub</a>
+
+  <header>
+    <div class="eyebrow">CKA · Fundamentals</div>
+    <h1>Pods &amp; Controllers — <span class="accent">The Basics Map</span></h1>
+    <p class="subtitle">The quick relationship chart: Pod, ReplicationController, ReplicaSet, Deployment, DaemonSet, StatefulSet, Job, CronJob, and Service.</p>
+  </header>
+
+  <div class="key-fact">
+    <strong>One sentence definition</strong>
+    <p style="margin: 0.6rem 0 0; color: var(--text);">
+      A <b>Pod</b> is the smallest runnable unit; controllers are the objects that keep pods created, replaced, scaled, updated, or placed in special ways.
+    </p>
+  </div>
+
+  <h2>The Owner Chain</h2>
+  <p>For normal app workloads, memorize this chain:</p>
+
+<pre><code>Deployment
+  └── ReplicaSet
+        └── Pod</code></pre>
+
+  <p>You usually create the <code>Deployment</code>. It creates a <code>ReplicaSet</code>. The ReplicaSet creates the Pods. If a Pod dies, the ReplicaSet replaces it. If you change the Deployment template, the Deployment creates a new ReplicaSet and rolls traffic toward it.</p>
+
+  <div class="scenario story">
+    <span class="label">mental model</span>
+    <p><b>Pod</b> is the worker. <b>ReplicaSet</b> is the headcount checker. <b>Deployment</b> is the manager who handles updates and rollbacks.</p>
+  </div>
+
+  <h2>The Main Objects</h2>
+  <table>
+    <tr><th>Object</th><th>apiVersion</th><th>What it does</th><th>CKA memory hook</th></tr>
+    <tr>
+      <td><code>Pod</code></td>
+      <td><code>v1</code></td>
+      <td>Runs one or more containers together on one node.</td>
+      <td>Smallest unit. Usually don't run apps with bare Pods.</td>
+    </tr>
+    <tr>
+      <td><code>ReplicationController</code></td>
+      <td><code>v1</code></td>
+      <td>Old controller that keeps N matching pods alive.</td>
+      <td>Legacy. Uses equality selectors only.</td>
+    </tr>
+    <tr>
+      <td><code>ReplicaSet</code></td>
+      <td><code>apps/v1</code></td>
+      <td>Modern replacement for ReplicationController.</td>
+      <td>Supports <code>matchLabels</code> and <code>matchExpressions</code>.</td>
+    </tr>
+    <tr>
+      <td><code>Deployment</code></td>
+      <td><code>apps/v1</code></td>
+      <td>Manages ReplicaSets and rolling updates.</td>
+      <td>Default choice for stateless apps.</td>
+    </tr>
+    <tr>
+      <td><code>DaemonSet</code></td>
+      <td><code>apps/v1</code></td>
+      <td>Runs one pod on each matching node.</td>
+      <td>Logs, metrics, CNI, node agents.</td>
+    </tr>
+    <tr>
+      <td><code>StatefulSet</code></td>
+      <td><code>apps/v1</code></td>
+      <td>Runs pods with stable names, order, and storage identity.</td>
+      <td><code>web-0</code>, <code>web-1</code>, stable PVCs.</td>
+    </tr>
+    <tr>
+      <td><code>Job</code></td>
+      <td><code>batch/v1</code></td>
+      <td>Runs pods until a task completes successfully.</td>
+      <td>Finite work, not forever services.</td>
+    </tr>
+    <tr>
+      <td><code>CronJob</code></td>
+      <td><code>batch/v1</code></td>
+      <td>Creates Jobs on a schedule.</td>
+      <td>Backup every night, report every hour.</td>
+    </tr>
+    <tr>
+      <td><code>Service</code></td>
+      <td><code>v1</code></td>
+      <td>Gives stable networking to matching pods.</td>
+      <td>Does not create pods. Selects pods by labels.</td>
+    </tr>
+  </table>
+
+  <h2>ReplicationController vs ReplicaSet</h2>
+  <p>They both try to keep a desired number of pods running. The difference is selector power and age.</p>
+
+  <table>
+    <tr><th></th><th>ReplicationController</th><th>ReplicaSet</th></tr>
+    <tr>
+      <td><b>Modern?</b></td>
+      <td>No, older object</td>
+      <td>Yes, modern object</td>
+    </tr>
+    <tr>
+      <td><b>apiVersion</b></td>
+      <td><code>v1</code></td>
+      <td><code>apps/v1</code></td>
+    </tr>
+    <tr>
+      <td><b>Selector</b></td>
+      <td>Simple equality selector</td>
+      <td><code>matchLabels</code> and <code>matchExpressions</code></td>
+    </tr>
+    <tr>
+      <td><b>Use directly?</b></td>
+      <td>Rarely</td>
+      <td>Rarely; Deployment usually owns it</td>
+    </tr>
+  </table>
+
+  <div class="tip">
+    <b>✓ Exam shortcut —</b> If asked to create a scalable stateless app, use <code>kubectl create deployment</code>. If asked specifically about older replication behavior, know that ReplicationController is the legacy cousin of ReplicaSet.
+  </div>
+
+  <h2>Selector Relationship</h2>
+  <p>Controllers do not own pods by name. They find pods by labels.</p>
+
+<pre><code>spec:
+  selector:
+    matchLabels:
+      app: nginx                 <span class="annotation"># controller looks for this</span>
+  template:
+    metadata:
+      labels:
+        app: nginx               <span class="annotation"># pods must wear this</span></code></pre>
+
+  <div class="mistake">
+    <b>✗ Common trap —</b> If <code>selector.matchLabels</code> does not match <code>template.metadata.labels</code>, a Deployment, ReplicaSet, or DaemonSet will fail validation or manage the wrong pods.
+  </div>
+
+  <h2>When to Use What</h2>
+  <table>
+    <tr><th>Need</th><th>Use</th><th>Why</th></tr>
+    <tr><td>Run one quick test container</td><td><code>Pod</code></td><td>Fastest minimal object.</td></tr>
+    <tr><td>Run a stateless web app</td><td><code>Deployment</code></td><td>Scaling, rollout, rollback.</td></tr>
+    <tr><td>Run one agent per node</td><td><code>DaemonSet</code></td><td>Pod count follows node count.</td></tr>
+    <tr><td>Run database-like pods with identity</td><td><code>StatefulSet</code></td><td>Stable names and storage.</td></tr>
+    <tr><td>Run a task to completion</td><td><code>Job</code></td><td>Success/failure completion tracking.</td></tr>
+    <tr><td>Run a task repeatedly by time</td><td><code>CronJob</code></td><td>Creates Jobs from a schedule.</td></tr>
+    <tr><td>Expose pods behind stable IP/DNS</td><td><code>Service</code></td><td>Pods come and go; Service stays.</td></tr>
+    <tr><td>Bootstrap control-plane component from node file</td><td><code>Static Pod</code></td><td>Kubelet can run it before API health.</td></tr>
+  </table>
+
+  <h2>Mini YAML Shapes</h2>
+
+  <h3>Bare Pod</h3>
+<pre><code>apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+spec:
+  containers:
+    - name: nginx
+      image: nginx</code></pre>
+
+  <h3>Deployment</h3>
+<pre><code>apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name: nginx
+          image: nginx</code></pre>
+
+  <h3>ReplicaSet</h3>
+<pre><code>apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: nginx-rs
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name: nginx
+          image: nginx</code></pre>
+
+  <h2>Useful Commands</h2>
+<pre><code># See ownership chain
+kubectl get deploy,rs,pod
+
+# Show labels
+kubectl get pods --show-labels
+
+# Scale a Deployment
+kubectl scale deployment nginx --replicas=5
+
+# Watch a rollout
+kubectl rollout status deployment/nginx
+
+# See ReplicaSets created by a Deployment
+kubectl get rs
+
+# Explain fields during the exam
+kubectl explain deployment.spec.selector
+kubectl explain replicaset.spec.selector
+kubectl explain pod.spec</code></pre>
+
+  <h2>Imperative Quick Commands for CKA Exam</h2>
+
+<pre><code># Pod
+kubectl run nginx --image=nginx
+kubectl run nginx --image=nginx --dry-run=client -o yaml &gt; pod.yaml
+
+# Deployment
+kubectl create deployment nginx --image=nginx --replicas=3
+kubectl create deployment nginx --image=nginx --dry-run=client -o yaml &gt; deploy.yaml
+
+# Scale and rollout
+kubectl scale deployment nginx --replicas=5
+kubectl rollout status deployment/nginx
+kubectl rollout undo deployment/nginx
+
+# Service for a Deployment
+kubectl expose deployment nginx --port=80 --target-port=80 --name=nginx-svc</code></pre>
+
+  <h2>Quick-Recall Drill</h2>
+  <table>
+    <tr><th>Question</th><th>Answer</th></tr>
+    <tr><td>Smallest Kubernetes workload unit?</td><td><code>Pod</code></td></tr>
+    <tr><td>Default object for stateless apps?</td><td><code>Deployment</code></td></tr>
+    <tr><td>What does a Deployment create?</td><td><code>ReplicaSet</code></td></tr>
+    <tr><td>What does a ReplicaSet create?</td><td><code>Pod</code></td></tr>
+    <tr><td>Modern replacement for ReplicationController?</td><td><code>ReplicaSet</code></td></tr>
+    <tr><td>One pod per node?</td><td><code>DaemonSet</code></td></tr>
+    <tr><td>Stable pod identity?</td><td><code>StatefulSet</code></td></tr>
+    <tr><td>Run to completion?</td><td><code>Job</code></td></tr>
+    <tr><td>Scheduled Jobs?</td><td><code>CronJob</code></td></tr>
+    <tr><td>Stable access to changing pods?</td><td><code>Service</code></td></tr>
+  </table>
+
+  <div class="mantra">
+    <strong>The Mantra</strong>
+    "Pods run containers. ReplicaSets count pods. Deployments manage ReplicaSets. Services find pods."
+  </div>
+
+  <footer>cka_notes / fundamentals / pod-controllers-basics.html</footer>
+
+</div>
+</body>
+</html>

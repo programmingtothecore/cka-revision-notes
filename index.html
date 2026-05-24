@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CKA Revision Hub</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface-hover: #1c2128;
+    --border: #30363d;
+    --border-hover: #58a6ff;
+    --text: #e6edf3;
+    --text-dim: #8b949e;
+    --accent: #326ce5;
+    --accent-light: #58a6ff;
+    --warm: #f0883e;
+    --green: #3fb950;
+    --purple: #bc8cff;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+    padding: 3rem 1.5rem 5rem;
+    background-image:
+      radial-gradient(circle at 15% 10%, rgba(50, 108, 229, 0.10), transparent 45%),
+      radial-gradient(circle at 85% 80%, rgba(240, 136, 62, 0.06), transparent 45%);
+  }
+
+  .container {
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 3.5rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: "SF Mono", Consolas, Monaco, monospace;
+    font-size: 0.85rem;
+    color: var(--accent-light);
+    background: rgba(50, 108, 229, 0.12);
+    border: 1px solid rgba(50, 108, 229, 0.3);
+    padding: 0.4rem 0.9rem;
+    border-radius: 999px;
+    margin-bottom: 1.25rem;
+    letter-spacing: 0.05em;
+  }
+
+  .logo::before {
+    content: "⎈";
+    font-size: 1.1rem;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, #58a6ff 0%, #bc8cff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .tagline {
+    color: var(--text-dim);
+    font-size: 1.05rem;
+  }
+
+  .stats {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-top: 1.5rem;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    font-family: "SF Mono", Consolas, Monaco, monospace;
+  }
+
+  .stats span strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+    margin: 2.5rem 0 1.25rem;
+    font-family: "SF Mono", Consolas, Monaco, monospace;
+  }
+
+  .section-title::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--card-accent, var(--accent));
+    opacity: 0.8;
+  }
+
+  .card:hover {
+    background: var(--surface-hover);
+    border-color: var(--border-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .tag {
+    font-family: "SF Mono", Consolas, Monaco, monospace;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.25rem 0.6rem;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+
+  .tag.scheduling { background: rgba(50, 108, 229, 0.15); color: var(--accent-light); }
+  .tag.resources { background: rgba(240, 136, 62, 0.15); color: var(--warm); }
+  .tag.story { background: rgba(188, 140, 255, 0.15); color: var(--purple); }
+  .tag.fundamentals { background: rgba(63, 185, 80, 0.15); color: var(--green); }
+
+  .arrow {
+    color: var(--text-dim);
+    transition: transform 0.2s, color 0.2s;
+    font-size: 1.2rem;
+  }
+
+  .card:hover .arrow {
+    transform: translateX(4px);
+    color: var(--accent-light);
+  }
+
+  .card h2 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--text);
+  }
+
+  .card p {
+    color: var(--text-dim);
+    font-size: 0.92rem;
+    line-height: 1.55;
+    flex: 1;
+  }
+
+  .card-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    font-family: "SF Mono", Consolas, Monaco, monospace;
+    padding-top: 0.5rem;
+    border-top: 1px dashed var(--border);
+  }
+
+  .card-meta::before {
+    content: "📄";
+    font-size: 0.9rem;
+  }
+
+  footer {
+    margin-top: 4rem;
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    font-family: "SF Mono", Consolas, Monaco, monospace;
+  }
+
+  footer kbd {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 0.8rem;
+    color: var(--text);
+  }
+
+  @media (max-width: 600px) {
+    h1 { font-size: 2rem; }
+    .stats { flex-direction: column; gap: 0.5rem; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="logo">CKA · Revision Notes</div>
+    <h1>Kubernetes Study Hub</h1>
+    <p class="tagline">A clickable index of my CKA prep notes — pick a topic and dive in.</p>
+    <div class="stats">
+      <span><strong>17</strong> notes</span>
+      <span><strong>5</strong> categories</span>
+      <span>last updated <strong>May 2026</strong></span>
+    </div>
+    <p style="margin-top: 1.5rem; font-size: 0.92rem;">
+      <a href="cka-topic-index.html"
+         style="display: inline-block; padding: 0.55rem 1.1rem; border-radius: 999px;
+                background: rgba(63,185,80,0.12);
+                border: 1px solid rgba(63,185,80,0.35); color: #3fb950;
+                text-decoration: none; font-family: 'SF Mono', Consolas, monospace;
+                letter-spacing: 0.04em; margin-right: 0.6rem;">
+        🔎 Searchable topic index
+      </a>
+      <a href="cka-add-custom-page.html"
+         style="display: inline-block; padding: 0.55rem 1.1rem; border-radius: 999px;
+                background: rgba(240,136,62,0.12);
+                border: 1px solid rgba(240,136,62,0.35); color: #f0883e;
+                text-decoration: none; font-family: 'SF Mono', Consolas, monospace;
+                letter-spacing: 0.04em; margin-right: 0.6rem;">
+        ＋ Add custom page
+      </a>
+      <a href="cka-revision-flow.html"
+         style="display: inline-block; padding: 0.55rem 1.1rem; border-radius: 999px;
+                background: linear-gradient(135deg, rgba(88,166,255,0.15), rgba(188,140,255,0.15));
+                border: 1px solid rgba(88,166,255,0.35); color: #58a6ff;
+                text-decoration: none; font-family: 'SF Mono', Consolas, monospace;
+                letter-spacing: 0.04em;">
+        🛤  Revising? Follow the sequential pipeline →
+      </a>
+    </p>
+  </header>
+
+  <div class="section-title">⚡ Exam Speed</div>
+  <div class="grid">
+
+    <a class="card" href="cka-imperative-commands-cheatsheet.html" style="--card-accent: #e3b341;">
+      <div class="card-header">
+        <span class="tag resources">Commands</span>
+        <span class="arrow">→</span>
+      </div>
+      <h2>Imperative Commands — One-Glance Cheat Sheet</h2>
+      <p>A summarized command map for creating pods, deployments, services, PriorityClasses, resources, Jobs, CronJobs, and checking output quickly.</p>
+      <div class="card-meta">cka-imperative-commands-cheatsheet.html</div>
+    </a>
+
+    <a class="card" href="cka-troubleshooting-log.html" style="--card-accent: #f85149;">
+      <div class="card-header">
+        <span class="tag resources">Troubleshoot</span>
+        <span class="arrow">→</span>
+      </div>
+      <h2>Troubleshooting Log — PriorityClass Pod YAML</h2>
+      <p>A super-brief recap of the PriorityClass pod issue, vim fixes, exported YAML cleanup, the <code>apiVersion</code> typo, and the final apply flow.</p>
+      <div class="card-meta">cka-troubleshooting-log.html</div>
+    </a>
+
+    <a class="card" href="cka-test-page.html" style="--card-accent: #58a6ff;">
+      <div class="card-header">
+        <span class="tag resources">Troubleshooting</span>
+        <span class="arrow">→</span>
+      </div>
+      <h2>Test - Page</h2>
+      <p>Test page for adding troubleshooting data, using ImagePullBackOff as the example flow.</p>
+      <div class="card-meta">cka-test-page.html</div>
+    </a>
+
+    <a class="card" href="cka-add-custom-page.html" style="--card-accent: #3fb950;">
+      <div class="card-header">
+        <span class="tag fundamentals">Tool</span>
+        <span class="arrow">→</span>
+      </div>
+      <h2>Add Custom Page — Generate a Matching Note</h2>
+      <p>A small page builder for creating matching CKA notes with preview, downloadable HTML, copyable full source, and a hub card snippet.</p>
+      <div class="card-meta">cka-add-custom-page.html</div>
+    </a>
+
+  </div>
+
+  <div class="section-title">📅 Scheduling &amp; Placement</div>
+  <div class="grid">
+
+    <a class="card" href="cka-scheduling-story.html" style="--card-accent: #bc8cff;">
+      <div class="card-header">
+        <span class="tag story">Story</span>
+        <span class="arrow">→</span>
+      </div>
+      <h2>Selectors, Affinity &amp; Tolerations — The Story</h2>
+      <p>A narrative walkthrough of how pods find their homes: nodeSelector, nodeAffinity, taints &amp; tolerations, told as a cast-and-acts story.</p>
+      <div class="card-meta">cka-scheduling-story.html</div>
+    </a>
+
+    <a class="card" href="cka-nodeaffinity-terms.html" style="--card-accent: #326ce5;">
+      <div class="card-header">
+        <span class="tag scheduling">Scheduling</span>
+        <span class="arrow">→</span>
+      </div>
+      <h2>nodeAffinity — Terms vs Expressions</h2>
+      <p>The AND/OR logic of nodeAffinity. When does adding another <code>matchExpression</code> mean AND, and when does adding another term mean OR?</p>
+      <div class="card-meta">cka-nodeaffinity-terms.html</div>
+    </a>
+
+    <a class="card" href="cka-daemonset.html" style="--card-accent: #58a6ff;">
+      <div class="card-header">
+        <span class="tag scheduling">Workloads</span>
+        <span class="arrow">→</span>
+      </div>
+      <h2>DaemonSet — One Pod Per Node</h2>
+      <p>What it is, when to use it, syntax, common mistakes, and the dry-run-and-modify trick to deploy one without <code>kubectl create ds</code> (which doesn't exist).</p>
+      <div class="card-meta">cka-daemonset.html</div>
+    </a>
+
+    <a class="card" href="cka-static-pods.html" style="--card-accent: #f0883e;">
+      <div class="card-header">
+        <span class="tag scheduling">Workloads</span>
+        <span class="arrow">→</span>
+      </div>
+      <h2>Static Pods — Kubelet-Managed Pods</h2>
+      <p>How pods can run without the scheduler, why control-plane components use them, and the exam workflow for finding, editing, and recovering manifests.</p>
+      <div class="card-meta">cka-static-pods.html</div>
+    </a>
+
+    <a class="card" href="cka-priorityclass.html" style="--card-accent: #e3b341;">
+      <div class="card-header">
+        <span class="tag scheduling">Scheduling</span>
+        <span class="arrow">→</span>
+      </div>
+      <h2>PriorityClass — Scheduling Priority &amp; Preemption</h2>
+      <p>How Kubernetes ranks pending pods, how <code>priorityClassName</code> works, and when high-priority pods can preempt lower-priority pods.</p>
+      <div class="card-meta">cka-priorityclass.html</div>
+    </a>
+
+    <a class="card" href="cka-multiple-schedulers.html" style="--card-accent: #58a6ff;">
+      <div class="card-header">
+        <span class="tag scheduling">Scheduling</span>
+        <span class="arrow">→</span>
+      </div>
+      <h2>Multiple Schedulers — Custom Pod Placement</h2>
+      <p>Why clusters can run more than one scheduler, how <code>schedulerName</code> works, common CKA questions, YAML, commands, and traps.</p>
+      <div class="card-meta">cka-multiple-schedulers.html</div>
+    </a>
+
+  </div>
+
+  <div class="section-title">⚙️ Resources &amp; Limits</div>
+  <div class="grid">
+
+    <a class="card" href="cka-requests-and-limits-story.html" style="--card-accent: #3fb950;">
+      <div class="card-header">
+        <span class="tag story">Story</span>
+        <span class="arrow">→</span>
+      </div>
+      <h2>Requests &amp; Limits — The Kitchen Story</h2>
+      <p>Every permutation of CPU/memory requests and limits, told through chefs in a shared kitchen. QoS classes, syntax gotchas, and when to use each pattern.</p>
+      <div class="card-meta">cka-requests-and-limits-story.html</div>
+    </a>
+
+    <a class="card" href="k8s-memory-units-gi-vs-gb.html" style="--card-accent: #f0883e;">
+      <div class="card-header">
+        <span class="tag resources">Resources</span>
+        <span class="arrow">→</span>
+      </div>
+      <h2>Memory Units — Gi vs GB</h2>
+      <p>Why <code>1Gi ≠ 1GB</code>, what binary vs decimal prefixes mean in Kubernetes resource specs, and the gotchas that cost you OOMKills.</p>
+      <div class="card-meta">k8s-memory-units-gi-vs-gb.html</div>
+    </a>
+
+  </div>
+
+  <div class="section-title">📚 Fundamentals</div>
+  <div class="grid">
+
+    <a class="card" href="cka-asymmetric-encryption-certificates.html" style="--card-accent: #bc8cff;">
+      <div class="card-header">
+        <span class="tag fundamentals">Security</span>
+        <span class="arrow">→</span>
+      </div>
+      <h2>Asymmetric Encryption, Signatures &amp; Certificates</h2>
+      <p>A plain-English visual map of public/private keys, signatures, hashes, certificates, CA chains, trust stores, mTLS, and TLS foundations.</p>
+      <div class="card-meta">cka-asymmetric-encryption-certificates.html</div>
+    </a>
+
+    <a class="card" href="cka-pod-controllers-basics.html" style="--card-accent: #bc8cff;">
+      <div class="card-header">
+        <span class="tag fundamentals">Fundamentals</span>
+        <span class="arrow">→</span>
+      </div>
+      <h2>Pods &amp; Controllers — The Basics Map</h2>
+      <p>The quick relationship chart: Pod, ReplicationController, ReplicaSet, Deployment, DaemonSet, StatefulSet, Job, CronJob, and Service.</p>
+      <div class="card-meta">cka-pod-controllers-basics.html</div>
+    </a>
+
+    <a class="card" href="cka-kubernetes-paths.html" style="--card-accent: #58a6ff;">
+      <div class="card-header">
+        <span class="tag fundamentals">Fundamentals</span>
+        <span class="arrow">→</span>
+      </div>
+      <h2>Kubernetes Paths — Files You Must Know</h2>
+      <p>A fast map of where kubeconfigs, static pod manifests, certs, kubelet config, etcd data, logs, and systemd units usually live.</p>
+      <div class="card-meta">cka-kubernetes-paths.html</div>
+    </a>
+
+    <a class="card" href="cka-apiversion-guide.html" style="--card-accent: #3fb950;">
+      <div class="card-header">
+        <span class="tag fundamentals">Fundamentals</span>
+        <span class="arrow">→</span>
+      </div>
+      <h2>How to Guess the apiVersion</h2>
+      <p>Three shortcuts: a memorable cheat sheet, a structural rule for deriving the group, and the <code>kubectl explain</code> trick that ends all guessing.</p>
+      <div class="card-meta">cka-apiversion-guide.html</div>
+    </a>
+
+  </div>
+
+  <footer>
+    Tip: open this file in your browser, or press <kbd>⌘</kbd> + <kbd>click</kbd> any card to open in a new tab.
+  </footer>
+
+</div>
+</body>
+</html>
