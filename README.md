@@ -2,6 +2,11 @@
 
 A lightweight static HTML study hub for CKA revision.
 
+## Links
+
+- Live site: https://programmingtothecore.github.io/cka-revision-notes/
+- GitHub repo: https://github.com/programmingtothecore/cka-revision-notes
+
 ## Open Locally
 
 Open `index.html` in a browser.
