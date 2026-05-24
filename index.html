@@ -243,8 +243,8 @@
   /* Mobile reading polish */
   @media (max-width: 760px) {
     body {
-      padding: 1rem 0.85rem 3rem !important;
-      line-height: 1.62;
+      padding: 0.75rem 0.65rem 2.5rem !important;
+      line-height: 1.5;
     }
 
     .container {
@@ -253,28 +253,37 @@
     }
 
     header {
-      margin-bottom: 1.5rem !important;
-      padding-bottom: 1rem !important;
+      margin-bottom: 1rem !important;
+      padding-bottom: 0.8rem !important;
     }
 
     header p a {
       display: block !important;
       width: 100%;
       max-width: 22rem;
-      margin: 0.55rem auto !important;
+      margin: 0.38rem auto !important;
+      padding: 0.42rem 0.7rem !important;
       text-align: center;
+      font-size: 0.72rem !important;
+      line-height: 1.25 !important;
+    }
+
+    header p:not(.tagline) {
+      margin-top: 0.75rem !important;
     }
 
     .logo {
-      font-size: 0.75rem !important;
-      padding: 0.35rem 0.7rem !important;
+      font-size: 0.7rem !important;
+      padding: 0.28rem 0.62rem !important;
+      margin-bottom: 0.7rem !important;
     }
 
     h1 {
-      font-size: 2rem !important;
+      font-size: 1.55rem !important;
       line-height: 1.12 !important;
       letter-spacing: 0 !important;
       overflow-wrap: anywhere;
+      margin-bottom: 0.35rem !important;
     }
 
     h2 {
@@ -328,7 +337,7 @@
     .two,
     .layout {
       grid-template-columns: 1fr !important;
-      gap: 0.9rem !important;
+      gap: 0.5rem !important;
     }
 
     .card,
@@ -343,10 +352,95 @@
       border-radius: 8px !important;
     }
 
-    .stats {
-      flex-direction: column !important;
-      align-items: center;
+    .tagline {
+      font-size: 0.88rem !important;
+      line-height: 1.35 !important;
+    }
+
+    .section-title {
+      margin: 1rem 0 0.5rem !important;
+      font-size: 0.68rem !important;
       gap: 0.45rem !important;
+      letter-spacing: 0.08em !important;
+    }
+
+    .card {
+      gap: 0.32rem !important;
+      min-height: 0 !important;
+      padding: 0.68rem 2.15rem 0.62rem 0.75rem !important;
+    }
+
+    .card::before {
+      width: 3px !important;
+      height: 100% !important;
+      right: auto !important;
+      bottom: 0 !important;
+    }
+
+    .card:hover {
+      transform: none !important;
+      box-shadow: none !important;
+    }
+
+    .card-header {
+      display: block !important;
+    }
+
+    .tag {
+      display: inline-block !important;
+      font-size: 0.56rem !important;
+      padding: 0.12rem 0.38rem !important;
+      letter-spacing: 0.06em !important;
+      line-height: 1.25 !important;
+    }
+
+    .arrow {
+      position: absolute !important;
+      right: 0.72rem !important;
+      top: 50% !important;
+      transform: translateY(-50%) !important;
+      font-size: 1rem !important;
+    }
+
+    .card:hover .arrow {
+      transform: translate(2px, -50%) !important;
+    }
+
+    .card h2 {
+      font-size: 0.95rem !important;
+      line-height: 1.2 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    .card p {
+      display: none !important;
+    }
+
+    .card-meta {
+      border-top: 0 !important;
+      padding-top: 0 !important;
+      font-size: 0.62rem !important;
+      line-height: 1.25 !important;
+      opacity: 0.68;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .card-meta::before {
+      content: "" !important;
+      display: none !important;
+    }
+
+    .stats {
+      flex-direction: row !important;
+      flex-wrap: wrap !important;
+      align-items: center;
+      justify-content: center !important;
+      gap: 0.35rem 0.75rem !important;
+      margin-top: 0.8rem !important;
+      font-size: 0.72rem !important;
     }
 
     .search-wrap {
